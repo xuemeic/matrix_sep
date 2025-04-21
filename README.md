@@ -2,4 +2,4 @@
 
 ## 1D
 ### H is the average filter
-run test_1d_avg.m
+run `test_1d_avg.m`
