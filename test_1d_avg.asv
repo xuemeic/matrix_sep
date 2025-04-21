@@ -1,8 +1,8 @@
 % Make H: averaging filter
 
-n = 50;
-m = 50;
-p = 50;
+n = 30;
+m = 30;
+p = 30;
 
 first_row = [1 1 zeros(1, m - 2)]; % First row of the circulant matrix H
 H = toeplitz([first_row(1), fliplr(first_row(2:end))], first_row); 
@@ -28,17 +28,14 @@ para.rho_outer = 0.5;
 para.rho_inner = 1; 
 para.N_outer = 500;
 para.N_inner = 30;
-para.tol_outer = 1e-7;
+para.tol_outer = 1e-9;
 para.tol_inner = 1e-5;
 para.decomp = "svd"; 
 lam =  1/sqrt(m);
 tic
 output = gen_matrix_sep(M0, H, lam, para);
 toc
-
-rel_L = norm(output.L - L0, 'fro')/norm(L0, 'fro');
-rel_S = norm(output.S - S0, 'fro')/norm(S0, 'fro');
-fprintf("Relative error of recovering L0: %e\n", rel_L);
-fprintf("Relative error of recovering S0: %e\n", rel_S);
-fprintf("Ran %g many outer loops.\n", output.count_outer);
-fprintf("Input H was circulant? Answer: %g \n", output.isCirc)
+rel_L = norm(output.L - L0, 'fro')/norm(L0, 'fro')
+rel_S = norm(output.S - S0, 'fro')/norm(S0, 'fro')
+output.count_outer
+output.isCirc

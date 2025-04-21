@@ -26,6 +26,7 @@ rho_outer = para.rho_outer;
 tol_outer = para.tol_outer;
 N_outer = para.N_outer;
 
+%%%%% parameters for lasso1()
 para_lasso.max_iter = para.N_inner;
 para_lasso.rho = para.rho_inner;
 para_lasso.tol = para.tol_inner;
@@ -102,8 +103,8 @@ function [count, s] = lasso1(A, b, a, para_lasso)
 %       - tol
 %       - max_iter
 %       - coef: if circulant
-%       - A2_V: A^T*A = V*S*V^T (pre-compute SVD if not circulant and using svd)
-%       - S
+%       - A2_V: The V matrix from "A^T*A = V*S*V^T" (pre-compute SVD if not circulant and using svd)
+%       - S: THe S matrix from "A^T*A = V*S*V^T".
 %       - L: pre-compute cholesky if not circulant and using chol
 % output s: m x k
 % s = argmin_x {a||x||_1 + 0.5||Ax - b||_2^2}
