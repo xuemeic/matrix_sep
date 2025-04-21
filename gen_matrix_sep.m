@@ -17,14 +17,15 @@ function output = gen_matrix_sep(M, H, lam, para)
 % - L: m x n
 % - S: p x n
 % - count_outer
+% - isCirc: TRUE or FALSE. TRUE if H is circulant.
 % updated on 4/9/2025
+% updated on 4/21/2025
 
 %%%%% pass the parameters
 rho_outer = para.rho_outer;
-
 tol_outer = para.tol_outer;
-
 N_outer = para.N_outer;
+
 para_lasso.max_iter = para.N_inner;
 para_lasso.rho = para.rho_inner;
 para_lasso.tol = para.tol_inner;
@@ -32,7 +33,6 @@ para_lasso.tol = para.tol_inner;
 %%%%% initialization
 [m, n] = size(M);
 [~, p] = size(H);
-
 
 L = zeros(m, n);
 S = zeros(p, n);
@@ -48,7 +48,6 @@ if is_circulant(H)
     d = abs(fft(H(:,1)));
     para_lasso.coef = d.^2 + para.rho_inner;
     
-    
 else
     isCirculant = false;
     para_lasso.isCirculant = isCirculant;
@@ -63,6 +62,7 @@ else
         para_lasso.A2_V = V_H;
     end
 end
+
 
 while RelChg > tol_outer && count_outer < N_outer
     Slast = S;
@@ -88,7 +88,7 @@ end
 output.L = L;
 output.S = S;
 output.count_outer = count_outer;
-output.circ = isCirculant;
+output.isCirc = isCirculant;
 end
 
 
@@ -97,14 +97,14 @@ function [count, s] = lasso1(A, b, a, para_lasso)
 % A is H:  p x m
 % b can have more than 1 columns; b is p by k
 % para_lasso has fields
-%       isCirculant
-%       rho
-%       tol
-%       max_iter
-%       coef: if circulant
-%       A2_V: A^T*A = V*S*V^T (pre-compute SVD if not circulant and using svd)
-%       S
-%       L: pre-compute cholesky if not circulant and using chol
+%       - isCirculant
+%       - rho
+%       - tol
+%       - max_iter
+%       - coef: if circulant
+%       - A2_V: A^T*A = V*S*V^T (pre-compute SVD if not circulant and using svd)
+%       - S
+%       - L: pre-compute cholesky if not circulant and using chol
 % output s: m x k
 % s = argmin_x {a||x||_1 + 0.5||Ax - b||_2^2}
 % update x: solve {A'*A + rho*eye(n)}x = A'*b + rho*(z - u)
