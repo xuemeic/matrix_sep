@@ -1,6 +1,7 @@
-function output = general_matrix_sep_2d(M, G1, G2, lam, para)
+function output = gen_matrix_sep_2d(M, G1, G2, lam, para)
 % generalized matrix separation
-% min||L||_* + lam||S||_1, subject to, L + HS = M, H = G2 otimes G1
+% min||L||_* + lam||S||_1, subject to, L + HS = M, 
+% H = G2 otimes G1 = kron(G2, G1)
 % input: M: given matrix: m1 x m2 x K
 % input: Gi: given matrix: pi x mi
 % input: lam
