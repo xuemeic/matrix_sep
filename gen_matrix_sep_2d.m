@@ -2,33 +2,52 @@ function output = gen_matrix_sep_2d(M, G1, G2, lam, para)
 % generalized matrix separation
 % min||L||_* + lam||S||_1, subject to, L + HS = M, 
 % H = G2 otimes G1 = kron(G2, G1)
-% input: M: given matrix: m1 x m2 x K
-% input: Gi: given matrix: pi x mi
-% input: lam
-% input: para has fields: 
-% - rho_outer, rho_inner, N_outer, N_inner, tol, decomp
+% input: 
+%      - M: given 3D matrix: m1 x m2 x K
+%      - Gi: given matrix: pi x mi
+%      - lam: positive scalar, as described above
+%      - para has fields: 
+%        - rho_outer
+%        - rho_inner
+%        - N_outer
+%        - N_inner
+%        - tol_outer
+%        - tol_inner
+%        - E1
+%        - E2
 
-% output has fields
+
+% output has fields:
 % - L: m1 x m2 x K
 % - S: p1 x p2 x K
 % - count_outer
 
 % written by Owen Deen, 11/23/2024
+% updated on 4/22/2025
 
+%%%%% pass the parameters
 rho_outer = para.rho_outer;
-
-para_lasso.rho = para.rho_inner;
-
-% if there is E this is only in block circulant case
-E = para.E;
-
+tol_outer = para.tol_outer;
 N_outer = para.N_outer;
+% if there is E this is only in block circulant case
+E1 = para.E1;
+E2 = para.E2;
+
+%%%%% parameters for lasso1()
+para_lasso.max_iter = para.N_inner;
+para_lasso.rho = para.rho_inner;
+para_lasso.tol = para.tol_inner;
+
+
+
+
+
 
 para_lasso.max_iter = para.N_inner;
 %para_lasso.tol = para.tol;
 para_lasso.tol = para.inner_tol;
 
-tol = para.tol;
+
 
 [m1, m2, K] = size(M);
 [p1, m1] = size(G1);
@@ -96,7 +115,7 @@ end
 
 
 
-while RelChg > tol && count_outer < N_outer
+while RelChg > tol_outer && count_outer < N_outer
 %while (r_primal > tol || s_dual > tol) && count_outer < N_outer
     Slast = S;
     Llast = L;
