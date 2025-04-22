@@ -1,7 +1,7 @@
 %% Make G1, G2
-K = 796;
-n = 40;
-m = 40;
+K = 700;
+n = 320;
+m = 240;
 
 m1 = m; % Dimension of G1
 p1 = m; % Dimension of G1
@@ -10,6 +10,10 @@ p2 = n;  % Dimension of G2
 
 %p = p1 * p2;
 %m = m1 * m2;
+
+% Try on video with E = randn(2,2);
+% E=[0.1,0.2;0.3,0.4]
+
 
 method = 'video';
 
@@ -35,9 +39,15 @@ switch method
     G2 = toeplitz([first_row(1), fliplr(first_row(2:end))], first_row); 
 
     case 'video'
-        E = 0.5 * ones(2,2);
-        G1 = kron(eye(m/2),E); %multiply on the left
-        G2 = kron(eye(n/2),E); % multiply on the right
+        %E = 0.5 * ones(2,2);
+        E = [0.4,0.6;0.6,0.4];
+
+        %G1 = kron(eye(m/2),E); %multiply on the left
+        G1 = kron(randn(m/2, m/2), E);
+
+        %G2 = kron(eye(n/2),E); % multiply on the right
+
+        G2 = kron(randn(n/2, n/2), E);
 
 end
 
@@ -79,15 +89,16 @@ end
 % Stack into a 3D double array
 gray_video = cat(3, gray_frames{:});
 
-%V = gray_video/255;
-V = gray_video;
+V = gray_video/255;
+%V = gray_video;
 
 %%
 % Get original frame size
 [h, w, numFrames] = size(V);
+%numFrames = 400;
 
 % Calculate center crop indices
-half_crop = 20;  % since you want 40x40
+half_crop = 20;  
 center_row = floor(h/2);
 center_col = floor(w/2);
 
@@ -103,9 +114,18 @@ for i = 1:numFrames
     V_cropped(:, :, i) = frame(row_range, col_range);
 end
 
-%% create the blurred video
-m = 40; n = 40; K = 796;
+%% Make G1, G2
+m = 40; n = 40; K = numFrames;
+
+%m = h; n = w;
+
+
 E = 0.5 * ones(2,2);
+
+%E = randn(2,2);
+%E1 = [0.8,0.2;0.6,0.4];
+%E = [0.4,0.6;0.6,0.4];
+
 G1 = kron(eye(m/2), E); %multiply on the left
 G2 = kron(eye(n/2), E); % multiply on the right
 
@@ -114,7 +134,7 @@ G2 = kron(eye(n/2), E); % multiply on the right
 %%
 i = 100;
 subplot(1,2,1)
-imshow(-CM(:,:,i),[])
+imshow(M(:,:,i),[])
 subplot(1,2,2)
 imshow(V_cropped(:,:,i),[])
 
@@ -176,33 +196,51 @@ CG2 = U2 * V2';
 
 %% Make M
 
-M0 = Ltrue + Strue;
+%M0 = Ltrue + Strue;
 
 
 
-%M = pagemtimes(pagemtimes(G1, V_cropped), G2');
 
-M = pagemtimes(pagemtimes(G1, M0), G2');
+
+% H_video = pagemtimes(pagemtimes(G1, ones(size(V_cropped))), G2');
+% blurr_M = pagemtimes(pagemtimes(G1, V_cropped), G2');
+% input_M = H_video - blurr_M;
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+M0 = pagemtimes(pagemtimes(G1, V_cropped), G2');
+
+%M0 = pagemtimes(pagemtimes(G1, V), G2');
+M = -M0 + pagemtimes(pagemtimes(G1, ones(size(M0))), G2');
+
+
+
+%M = pagemtimes(pagemtimes(G1, M0), G2');
 
 %HS = pagemtimes(pagemtimes(G1, Strue), G2');
 %M = Ltrue + HS;
 
 %% Add the C
+% 
+% CM = pagemtimes(pagemtimes(C1, input_M), C2');
+% 
+% CM = pagemtimes(pagemtimes(C1, blurr_M), C2');
 
 CM = pagemtimes(pagemtimes(C1, M), C2');
 
 
 %% Testing the gen matrix 2d
-para.rho_outer = 0.1;
-para.rho_inner = 10;
+para.rho_outer = 1;
+para.rho_inner = 100;
 
 para.E = E; % testing svd so this is not circulant
 %para.E = randn(2,2);
 
 
 
-para.N_inner = 200;
-para.N_outer = 50;
+para.N_inner = 170; % 170 works good for 40 x 40 x 400
+para.N_outer = 7; % 7
 
 para.inner_tol = 1e-6;
 para.tol = 1e-6;
@@ -222,58 +260,80 @@ lam =  1/sqrt(min(m*n, K)); % since matrix is mn by K
 % testing code
 
 % -CM
-output = general_matrix_sep_2d(CM, CG1, CG2, lam, para)
 
+%output = general_matrix_sep_2d(M, G1, G2, lam, para)
+
+output = general_matrix_sep_2d(CM, CG1, CG2, lam, para)
 HS_output = pagemtimes(pagemtimes(G1, output.S), G2');
 
-L_output = M - HS;
-%L_output = BV - HS_output;
+L_output = M - HS_output;
+
+%L_output = M0 - HS_output;
+
+%L_output = output.L;
 
 % S_output = output['S']
-S_output = output.S;
-
-
-
+S_output = output.S; 
 
 %% % Compute relative errors
 
-% recovering HL
-HL = pagemtimes(pagemtimes(G1, Ltrue), G2'); % this is the "Lhat"
 
-rel_L = norm(L_output - HL, 'fro') / norm(HL, 'fro')
+rel_L = norm(L_output - Ltrue, 'fro') / norm(Ltrue, 'fro')
 rel_S = norm(S_output - Strue, 'fro') / norm(Strue, 'fro')
 
 % - M = -L + H(-S)
 
+%% Save the variables
+save('full-video-matrixsep-results2.mat', 'M', 'L_output', 'S_output', '-v7.3');
+
+
+
+
 %% View the video frame 
-i = 100;
+i = 1;
 subplot(1,3,1)
 imshow(V_cropped(:,:,i),[])
 subplot(1,3,2)
-imshow(1- S_output(:,:,i),[])
+imshow(S_output(:,:,i),[])
 subplot(1,3,3)
-imshow(-1-L_output(:,:,i),[])
+imshow(L_output(:,:,i),[])
+
+%% Load the variables to view
+
+%load('1234-E-matrixsep-results.mat');
+
+load('full-video-matrixsep-results2.mat')
+
 
 %%
 
-numFrames = size(V_cropped, 3);
+numFrames = size(V, 3);
 
 i = 1;
 
 figure;
 
+% -M=-L+H(-S)
+%
+
 while i <= numFrames
-    subplot(1,3,1)
+
+    subplot(1,4,1)
+    imshow(V_cropped(:,:,i), []);
+    title(['Frame ', num2str(i)]);
+
+
+    subplot(1,4,2)
     imshow(M(:,:,i), []);
     title(['Blurred - Frame ', num2str(i)]);
 
-    subplot(1,3,2)
+    subplot(1,4,3)
     imshow(1 - S_output(:,:,i), []);
-    title('Sparse');
+    title('1 - S');
 
-    subplot(1,3,3)
-    imshow(-1 - L_output(:,:,i), []);
-    title('Low-Rank');
+    subplot(1,4,4)
+    imshow(L_output(:,:,i), []);
+    title('L');
 
     k = waitforbuttonpress;
     
