@@ -40,3 +40,22 @@ Relative error of recovering S0: 1.049253e-02
 Ran 500 many outer loops.
 Input H was circulant? Answer: 0 
 ```
+
+## 2D
+### H is i.i.d N(0, 1)
+run `test_2d_randn.m`
+
+Matlab output:
+```
+Elapsed time is 1.002164 seconds.
+Relative error of recovering L0: 3.156142e-01
+Relative error of recovering S0: 1.530180e-03
+Ran 200 many outer loops.
+Input H was circulant? Answer: 0 
+****** with preconditioning ******
+Elapsed time is 0.128357 seconds.
+Relative error of recovering L0: 1.065884e-05
+Relative error of recovering S0: 7.374641e-08
+Ran 54 many outer loops.
+Input H was circulant? Answer: 0 
+```
