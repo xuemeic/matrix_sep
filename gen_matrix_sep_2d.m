@@ -2,9 +2,10 @@ function output = gen_matrix_sep_2d(M, G1, G2, lam, para)
 % generalized matrix separation
 % min||L||_* + lam||S||_1, subject to, L + HS = M, 
 % H = G2 otimes G1 = kron(G2, G1)
+% H is theoretically m1m2 x p1p2 
 % input: 
 %      - M: given 3D matrix: m1 x m2 x K
-%      - Gi: given matrix: pi x mi
+%      - Gi: given matrix: mi x pi
 %      - lam: positive scalar, as described above
 %      - para has fields: 
 %        - rho_outer
@@ -13,6 +14,7 @@ function output = gen_matrix_sep_2d(M, G1, G2, lam, para)
 %        - N_inner
 %        - tol_outer
 %        - tol_inner
+%        - is_E: if true, then E1, E2 need to be provided
 %        - E1
 %        - E2
 
@@ -24,36 +26,23 @@ function output = gen_matrix_sep_2d(M, G1, G2, lam, para)
 
 % written by Owen Deen, 11/23/2024
 % updated on 4/22/2025
+% updated on 5/15/2025
 
 %%%%% pass the parameters
 rho_outer = para.rho_outer;
 tol_outer = para.tol_outer;
 N_outer = para.N_outer;
-% if there is E this is only in block circulant case
-E1 = para.E1;
-E2 = para.E2;
 
-%%%%% parameters for lasso1()
+
+%%%%% parameters for lasso2()
 para_lasso.max_iter = para.N_inner;
 para_lasso.rho = para.rho_inner;
 para_lasso.tol = para.tol_inner;
 
-
-
-
-
-
-para_lasso.max_iter = para.N_inner;
-%para_lasso.tol = para.tol;
-para_lasso.tol = para.inner_tol;
-
-
-
+%%%%% initialization
 [m1, m2, K] = size(M);
-[p1, m1] = size(G1);
-[p2, m2] = size(G2);
-
-[n1, ~] = size(E);
+[~, p1] = size(G1);
+[~, p2] = size(G2);
 
 
 L = zeros(m1, m2, K);
@@ -66,32 +55,23 @@ count_outer = 0;
 
 if is_circulant(G1) && is_circulant(G2)
     isCirculant = true;
-    
     para_lasso.isCirculant = isCirculant;
-    
-    % Since we are computing F G^T G F^* = D
-
     D1 = abs(fft(G1(:,1))).^2;
-
     D2 = abs(fft(G2(:,1))).^2;
+    para_lasso.coef = D1 * D2' + para.rho_inner;
 
-    para_lasso.D = D1 * D2' + para.rho_inner;
-
-elseif is_circulant(E)
+elseif para.is_E
+    E1 = para.E1;
+    E2 = para.E2;
+    [n1, ~] = size(E1);
+    [n2, ~] = size(E2);
+    %isCirculant = true;
+    %para_lasso.isCirculant = isCirculant;
     
-    isCirculant = true;
-    para_lasso.isCirculant = isCirculant;
-    
-
-    a = abs(fft(E(:,1))).^2;
-
-    b = abs(fft(E(:,1))).^2;
-
-    Lc = kron(ones(m1/n1, m2/n1), a * b');
-
-    para_lasso.D = Lc + para.rho_inner;
-
-
+    a = abs(fft(E1(:,1))).^2;
+    b = abs(fft(E2(:,1))).^2;
+    Lc = kron(ones(m1/n1, m2/n2), a * b');
+    para_lasso.coef = Lc + para.rho_inner;
 
 else
 
@@ -109,7 +89,7 @@ else
     para_lasso.Sig = S1 * S2'; %m1 by m2
 
 
-    para_lasso.decomp = "svd";
+    %para_lasso.decomp = "svd";
    
 end
 
@@ -121,8 +101,10 @@ while RelChg > tol_outer && count_outer < N_outer
     Llast = L;
     
     HS = bilinear_framewise(S, G1, G2');
+    
     L = SVT(reshape(M - HS - U, [m1*m2, K]), 1/rho_outer);
     L = reshape(L, [m1, m2, K]);
+    
     
     [count_inner,RelChg_lasso, S] = lasso2(G1, G2, M - U - L, lam/rho_outer, para_lasso);
     
@@ -130,8 +112,6 @@ while RelChg > tol_outer && count_outer < N_outer
     U = U + L + HS - M;
     count_outer = count_outer + 1;
 
-    % 
-    % 
     % % Check convergence
     % % finding the relative error
     
@@ -161,54 +141,46 @@ output.Sdn = Sdn;
 output.Ln = Ln;
 output.Sn = Sn;
 output.RelChg_lasso = RelChg_lasso;
+output.isCirc = isCirculant;
 end
 
-function [count,RelChg, S] = lasso2(G1, G2, Video, lambda, para_lasso)
-% A is H: 
-% G1, G2 are from H
-% B can have more than 1 columns; b is m1 by m2 by k
-% output S will have the same size as B
-
-% s = argmin_x {a||x||_1 + 0.5||HS - L - U + M||}
-% update x: solve {A'*A + rho*eye(n)}x = A'*b + rho*(z - u)
+%%%%%%%%%%%  lasso2 %%%%%%%%%%%%%%%%
+function [count, RelChg, S] = lasso2(G1, G2, Video, lambda, para_lasso)
+% S = argmin_{X in p1p2 x K} {a||X||_1 + 0.5||H*X - vec(B)||_2}
+% output S will be reshaped to: p1 x p2 x K
+% Video = B: m1 x m2 x K
+% vec(B): m1m2 x K
+% H = kron(G2, G1) is m1m2 x p1p2
+% Gi: mi x pi 
+% H*vec(X) can be computed by G1*X(:,:,k)*transpose(G2)
 
 max_iter = para_lasso.max_iter;
 rho = para_lasso.rho;
 
-[p1, p2, k] = size(Video);
-[~, m1] = size(G1);
-[~, m2] = size(G2);
-X = zeros(m1, m2, k);
+[~, ~, k] = size(Video);
+[~, p1] = size(G1);
+[~, p2] = size(G2);
+X = zeros(p1, p2, k);
 Z = X;
 U = X;
 count = 0;
 RelChg = 1;
 eps = para_lasso.tol;
-%coef = A'*A + rho*eye(n);
 
 while count < max_iter && RelChg > eps
     Zlast = Z;
     Xlast = X;
-
+    % update X: solve {H'*H + rho}X = H'*b + rho*(z - u)
+    % H'*H = kron(V2, V1)*kron(sig2, sig1)*(kron(V2, V1))'
     rhs = bilinear_framewise(Video, G1', G2) + rho*(Z - U);
- 
 
     % update X
     if para_lasso.isCirculant
-    
-        D = para_lasso.D;
-    
-        
+        D = para_lasso.coef;
         temp = fft2(rhs);
-
-
         temp2 =  temp ./ D;
-
-
         X = real(ifft2(temp2));
-
       
-
     else 
         % this is for the 1d case
         % V = para_lasso.V;
@@ -218,32 +190,16 @@ while count < max_iter && RelChg > eps
         V1 = para_lasso.V1;
         S = para_lasso.Sig; % m1 by m2
         V2 = para_lasso.V2;
-
-        %U1 = para_lasso.U1;
-        %U2 = para_lasso.U2;
-        
-
-        % needs to be 3d
-
-        % Sig is 10 * 20
-
-        %Sig = abs(S1) * abs(S2');
         
         temp = bilinear_framewise(rhs, V1', V2);
 
         temp2 = temp ./ (S + rho);
-
         
-        X = bilinear_framewise(temp2, V1, V2');
-
-      
+        X = bilinear_framewise(temp2, V1, V2');      
 
     end
 
-
-    % solve coef*x = rhs
-    %x = coef\rhs;
-
+    
     % update z
     Z = SoftThresh(X + U, lambda/rho);
 
@@ -253,20 +209,19 @@ while count < max_iter && RelChg > eps
     % Check convergence
     % finding the relative error
     xdn = norm(X - Xlast, 'fro');
-    %zdn = norm(Z - Zlast, 'fro');
+    zdn = norm(Z - Zlast, 'fro');
     xn = norm(Xlast, 'fro');
-    %zn = norm(Zlast, 'fro');
+    zn = norm(Zlast, 'fro');
 
     % updating stopping critera
-    %RelChg = (xdn^2 + zdn^2)^0.5 / ((xn^2 + zn^2) + 1)^0.5;
+    RelChg = (xdn^2 + zdn^2)^0.5 / ((xn^2 + zn^2) + 1)^0.5;
 
-    RelChg = (xdn) / ((xn) + 1);
+    %RelChg = (xdn) / ((xn) + 1);
 
     count = count + 1;
 end
 
 S = X;
-
 
 end
 
