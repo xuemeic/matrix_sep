@@ -1,12 +1,22 @@
-m1 = 10;
-p1 = 9;
-m2 = 9;
-p2 = 8;
-K = 50;
-
+n1 = 2;
 rng(3);
-G1 = randn(m1, p1);
-G2 = randn(m2, p2);
+E1 = rand(n1, n1);
+E1 = E1./sum(E1, 2);
+% E1 will have row sum to be 1
+
+n2 = 3;
+E2 = rand(n2, n2);
+E2 = E2./sum(E2, 1);
+% E2 will have column sum to be 1
+
+m1 = 20;
+m2 = 30;
+p1 = m1;
+p2 = m2;
+K = 100;
+
+G1 = kron(eye(m1/n1), E1);
+G2 = kron(eye(m2/n2), E2);
 
 % make S0
 num_elements = p1 * p2;
@@ -37,8 +47,9 @@ para.N_inner = 50;
 para.tol_outer = 1e-8;
 para.tol_inner = 1e-6;
 para.is_E = false;
+para.E1 = E1;
+para.E2 = E2;
 lam =  1/sqrt(min(m1*m2, K));
-
 
 tic
 output = gen_matrix_sep_2d(M0, G1, G2, lam, para);

@@ -72,6 +72,8 @@ elseif para.is_E
     b = abs(fft(E2(:,1))).^2;
     Lc = kron(ones(m1/n1, m2/n2), a * b');
     para_lasso.coef = Lc + para.rho_inner;
+    isCirculant = true;
+    para_lasso.isCirculant = isCirculant;
 
 else
 
@@ -87,12 +89,8 @@ else
     S2 = diag(S2); % m2
 
     para_lasso.Sig = S1 * S2'; %m1 by m2
-
-
-    %para_lasso.decomp = "svd";
    
 end
-
 
 
 while RelChg > tol_outer && count_outer < N_outer
@@ -146,10 +144,10 @@ end
 
 %%%%%%%%%%%  lasso2 %%%%%%%%%%%%%%%%
 function [count, RelChg, S] = lasso2(G1, G2, Video, lambda, para_lasso)
-% S = argmin_{X in p1p2 x K} {a||X||_1 + 0.5||H*X - vec(B)||_2}
-% output S will be reshaped to: p1 x p2 x K
 % Video = B: m1 x m2 x K
-% vec(B): m1m2 x K
+% S = argmin_{X in p1p2 x K} {lambda||X||_1 + 0.5||H*X - vec(B)||_2}
+% output S will be reshaped to: p1 x p2 x K
+
 % H = kron(G2, G1) is m1m2 x p1p2
 % Gi: mi x pi 
 % H*vec(X) can be computed by G1*X(:,:,k)*transpose(G2)
@@ -170,11 +168,11 @@ eps = para_lasso.tol;
 while count < max_iter && RelChg > eps
     Zlast = Z;
     Xlast = X;
-    % update X: solve {H'*H + rho}X = H'*b + rho*(z - u)
-    % H'*H = kron(V2, V1)*kron(sig2, sig1)*(kron(V2, V1))'
+    
     rhs = bilinear_framewise(Video, G1', G2) + rho*(Z - U);
 
-    % update X
+    % update X: solve {H'*H + rho}X = H'*b + rho*(z - u)
+    % H'*H = kron(V2, V1)*kron(sig2, sig1)*(kron(V2, V1))'
     if para_lasso.isCirculant
         D = para_lasso.coef;
         temp = fft2(rhs);
@@ -182,11 +180,6 @@ while count < max_iter && RelChg > eps
         X = real(ifft2(temp2));
       
     else 
-        % this is for the 1d case
-        % V = para_lasso.V;
-        % sig = diag(para_lasso.sig); % column vector
-        % x = (V'*rhs)./(sig + rho);
-        % x = V*x;
         V1 = para_lasso.V1;
         S = para_lasso.Sig; % m1 by m2
         V2 = para_lasso.V2;
@@ -196,14 +189,13 @@ while count < max_iter && RelChg > eps
         temp2 = temp ./ (S + rho);
         
         X = bilinear_framewise(temp2, V1, V2');      
-
     end
 
     
-    % update z
+    % update Z
     Z = SoftThresh(X + U, lambda/rho);
 
-    % update u
+    % update U
     U = U + X - Z;
 
     % Check convergence

@@ -1,0 +1,42 @@
+n1 = 2;
+rng(3);
+E1 = rand(n1, n1);
+E1 = E1./sum(E1, 2);
+% E1 will have row sum to be 1
+
+n2 = 3;
+E2 = rand(n2, n2);
+E2 = E2./sum(E2, 1);
+% E2 will have column sum to be 1
+
+m1 = 20;
+m2 = 30;
+p1 = m1;
+p2 = m2;
+K = 
+
+G1 = kron(eye(m1/n1), E1);
+G2 = kron(eye(m2/n2), E2);
+
+% make S0
+num_elements = p1 * p2;
+percent_nonzero = 4;
+num_nonzeros = K*round((percent_nonzero / 100) * num_elements);
+nonzero_idx = randsample(p1*p2*K, num_nonzeros);
+S0 = zeros(p1, p2, K);
+S0(nonzero_idx) = rand(num_nonzeros, 1) + 1;
+
+% make L0
+rank_r = 1;
+L1 = randn([m1*m2, rank_r]);  % m x r matrix
+L1 = orth(L1);
+L2 = randn([K, rank_r]);  % r x n matrix
+L2 = orth(L2);
+% Multiply to get the low-rank matrix (m x n)
+L0 = L1*L2';
+L0 = reshape(L0, [m1, m2, K]);
+
+% make M0
+M0 = L0 + pagemtimes(pagemtimes(G1, S0), G2');
+
+
