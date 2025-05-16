@@ -1,3 +1,4 @@
+% Gi = kron(eye(mi/ni), Ei);
 % E1, E2 will not be circulant
 
 m1 = 20;

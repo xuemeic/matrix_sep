@@ -27,6 +27,8 @@ function output = gen_matrix_sep_2d(M, G1, G2, lam, para)
 % written by Owen Deen, 11/23/2024
 % updated on 4/22/2025
 % updated on 5/15/2025: does not work using E1 and E2
+% updated on 5/16/2025: Ei work now. In genral, recommend to set para.is_E
+% = false
 
 %%%%% pass the parameters
 rho_outer = para.rho_outer;

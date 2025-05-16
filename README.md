@@ -54,7 +54,7 @@ Input H was circulant? Answer: 0
 ```
 
 ## 2D
-### H is i.i.d N(0, 1)
+### Gi are i.i.d N(0, 1)
 run `test_2d_randn.m`
 
 Matlab output:
@@ -71,3 +71,69 @@ Relative error of recovering S0: 7.374641e-08
 Ran 54 many outer loops.
 Input H was circulant? Answer: 0 
 ```
+### Gi are circulant
+run `test_2d_circ.m`
+
+Matlab output
+```
+Elapsed time is 1.289915 seconds.
+Relative error of recovering L0: 7.721161e-02
+Relative error of recovering S0: 5.211517e-04
+Ran 200 many outer loops.
+Input H was circulant? Answer: 1 
+****** with preconditioning ******
+Elapsed time is 0.100528 seconds.
+Relative error of recovering L0: 3.255672e-06
+Relative error of recovering S0: 6.323612e-08
+Ran 26 many outer loops.
+Input H was circulant? Answer: 0 
+```
+
+### Gi block structured
+run `test_2d_Ei.m`
+
+Gi = kron(eye(mi/ni), Ei); Each Ei is NOT circulant.
+
+Matlab output
+```
+Elapsed time is 10.361942 seconds.
+Relative error of recovering L0: 9.692872e+00
+Relative error of recovering S0: 7.731320e-01
+Ran 200 many outer loops.
+Input H was circulant? Answer: 0 
+****** with preconditioning ******
+Elapsed time is 1.087051 seconds.
+Relative error of recovering L0: 6.570278e-07
+Relative error of recovering S0: 1.708588e-08
+Ran 38 many outer loops.
+Input H was circulant? Answer: 0 
+```
+
+### Gi block circulant
+run `test_2d_Ei_circ.m`
+
+Gi = kron(eye(mi/ni), Ei); Each Ei is circulant.
+
+Matlab output
+```
+Elapsed time is 7.692549 seconds.
+Relative error of recovering L0: 3.199401e+01
+Relative error of recovering S0: 9.344267e-01
+Ran 153 many outer loops.
+Input H was circulant? Answer: 0 
+****** with preconditioning ******
+Elapsed time is 0.903337 seconds.
+Relative error of recovering L0: 6.122999e-07
+Relative error of recovering S0: 1.717772e-08
+Ran 34 many outer loops.
+Input H was circulant? Answer: 0 
+```
+
+### video background removal and deconvolution simultaneously
+run `test_2d_vid`
+
+Matlab output
+```
+Elapsed time is 38.244819 seconds.
+```
+![results](figs/frame10.jpg)

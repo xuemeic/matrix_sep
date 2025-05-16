@@ -1,3 +1,4 @@
+% This is when both Gi are circulant
 m1 = 10;
 p1 = m1;
 m2 = 9;

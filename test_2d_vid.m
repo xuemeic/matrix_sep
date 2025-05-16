@@ -1,5 +1,5 @@
 load('data/video.mat'); % get V: 240 by 320 by 300
-V = uint8(V);
+V = uint8(V); % values are integers from 0 to 255
 V = im2double(V); % ranges from 0 to 1
 
 [h, w, numFrames] = size(V);
@@ -32,10 +32,11 @@ E2r1 = E2r1/sum(E2r1); % First row of the circulant matrix
 E2 = toeplitz([E2r1(1), fliplr(E2r1(2:end))], E2r1); 
 E2 = E2';
 % E2 will have column sum to be 1
-% E2 will have column sum to be 1
 
 G1 = kron(eye(m1/n1), E1);
 G2 = kron(eye(m2/n2), E2);
+
+% preconditioning is appliedm
 [CG1, C1] = precondition(G1);
 [CG2, C2] = precondition(G2);
 
@@ -68,10 +69,10 @@ imshow(V_cropped(:,:, k))
 title('original')
 subplot(1, 4, 2)
 imshow(M0(:,:, k))
-title('Blurred frame')
+title('Blurred')
 subplot(1, 4, 3)
 imshow(1-outputC.S(:,:, k), [])
-title('deblurred sparse')
+title('deblurred sparse component')
 subplot(1, 4, 4)
 imshow(-L_output(:,:, k), [])
 title('background')
