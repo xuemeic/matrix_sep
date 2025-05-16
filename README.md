@@ -137,3 +137,11 @@ Matlab output
 Elapsed time is 38.244819 seconds.
 ```
 ![results](figs/frame10.jpg)
+
+run `test_2d_vid_full`
+
+Matlab output
+```
+Elapsed time is 1188.331929 seconds.
+```
+![full](figs/frame10_full.jpg)
