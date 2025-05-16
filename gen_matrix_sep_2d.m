@@ -26,7 +26,7 @@ function output = gen_matrix_sep_2d(M, G1, G2, lam, para)
 
 % written by Owen Deen, 11/23/2024
 % updated on 4/22/2025
-% updated on 5/15/2025
+% updated on 5/15/2025: does not work using E1 and E2
 
 %%%%% pass the parameters
 rho_outer = para.rho_outer;
@@ -55,14 +55,14 @@ count_outer = 0;
 
 if is_circulant(G1) && is_circulant(G2)
     isCirculant = true;
-    para_lasso.isCirculant = isCirculant;
+    
     D1 = abs(fft(G1(:,1))).^2;
     D2 = abs(fft(G2(:,1))).^2;
     para_lasso.coef = D1 * D2' + para.rho_inner;
 
 elseif para.is_E
     isCirculant = true;
-    para_lasso.isCirculant = isCirculant;
+    
     E1 = para.E1;
     E2 = para.E2;
     [n1, ~] = size(E1);
@@ -75,23 +75,19 @@ elseif para.is_E
     Lc = kron(ones(m1/n1, m2/n2), a * b');
     para_lasso.coef = Lc + para.rho_inner;
     
-
 else
-
     isCirculant = false;
-    para_lasso.isCirculant = isCirculant;
-
     % calculating svd of G1 and G2
     [~, S1, para_lasso.V1] = svd(G1' * G1);
-    S1 = diag(S1); % m1
+    S1 = diag(S1); % m1 by 1
  
-
     [~, S2, para_lasso.V2] = svd(G2' * G2);
-    S2 = diag(S2); % m2
-
-    para_lasso.Sig = S1 * S2'; %m1 by m2
+    S2 = diag(S2); % m2 by 1
+    para_lasso.Sig = S1 * S2'; % m1 by m2
    
 end
+
+para_lasso.isCirculant = isCirculant;
 
 
 while RelChg > tol_outer && count_outer < N_outer
@@ -143,7 +139,7 @@ output.RelChg_lasso = RelChg_lasso;
 output.isCirc = isCirculant;
 end
 
-%%%%%%%%%%%  lasso2 %%%%%%%%%%%%%%%%
+%%%%%%%%%%% lasso2 %%%%%%%%%%%%%%%%
 function [count, RelChg, S] = lasso2(G1, G2, Video, lambda, para_lasso)
 % Video = B: m1 x m2 x K
 % S = argmin_{X in p1p2 x K} {lambda||X||_1 + 0.5||H*X - vec(B)||_2}
@@ -176,9 +172,7 @@ while count < max_iter && RelChg > eps
     % H'*H = kron(V2, V1)*kron(sig2, sig1)*(kron(V2, V1))'
     if para_lasso.isCirculant
         D = para_lasso.coef;
-        temp = fft2(rhs);
-        temp2 =  temp ./ D;
-        X = real(ifft2(temp2));
+        X = real(ifft2(fft2(rhs)./D));
       
     else 
         V1 = para_lasso.V1;

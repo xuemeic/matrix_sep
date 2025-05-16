@@ -55,12 +55,14 @@ count_outer = 0;
 
 if is_circulant(G1) && is_circulant(G2)
     isCirculant = true;
-    para_lasso.isCirculant = isCirculant;
+    
     D1 = abs(fft(G1(:,1))).^2;
     D2 = abs(fft(G2(:,1))).^2;
     para_lasso.coef = D1 * D2' + para.rho_inner;
 
 elseif para.is_E
+    isCirculant = true;
+    
     E1 = para.E1;
     E2 = para.E2;
     [n1, ~] = size(E1);
@@ -72,13 +74,11 @@ elseif para.is_E
     b = abs(fft(E2(:,1))).^2;
     Lc = kron(ones(m1/n1, m2/n2), a * b');
     para_lasso.coef = Lc + para.rho_inner;
-    isCirculant = true;
-    para_lasso.isCirculant = isCirculant;
-
+    
 else
 
     isCirculant = false;
-    para_lasso.isCirculant = isCirculant;
+    
 
     % calculating svd of G1 and G2
     [~, S1, para_lasso.V1] = svd(G1' * G1);
@@ -91,6 +91,8 @@ else
     para_lasso.Sig = S1 * S2'; %m1 by m2
    
 end
+
+para_lasso.isCirculant = isCirculant;
 
 
 while RelChg > tol_outer && count_outer < N_outer
@@ -175,9 +177,7 @@ while count < max_iter && RelChg > eps
     % H'*H = kron(V2, V1)*kron(sig2, sig1)*(kron(V2, V1))'
     if para_lasso.isCirculant
         D = para_lasso.coef;
-        temp = fft2(rhs);
-        temp2 =  temp ./ D;
-        X = real(ifft2(temp2));
+        X = real(ifft2(fft2(rhs)./D));
       
     else 
         V1 = para_lasso.V1;
@@ -189,7 +189,6 @@ while count < max_iter && RelChg > eps
         temp2 = temp ./ (S + rho);
         
         X = bilinear_framewise(temp2, V1, V2');      
-
     end
 
     
