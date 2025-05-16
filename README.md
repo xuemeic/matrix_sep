@@ -36,14 +36,20 @@ n = 50;
 m = 45;
 p = 48;
 
-run `test_1d_randn.m`. No preconditioning.
+run `test_1d_randn.m`. 
 
 Matlab output:
 ```
-Elapsed time is 0.575970 seconds.
+Elapsed time is 0.647993 seconds.
 Relative error of recovering L0: 7.340115e-01
 Relative error of recovering S0: 1.049253e-02
 Ran 500 many outer loops.
+Input H was circulant? Answer: 0 
+****** with preconditioning ******
+Elapsed time is 0.080081 seconds.
+Relative error of recovering L0: 7.035533e-05
+Relative error of recovering S0: 2.530329e-06
+Ran 95 many outer loops.
 Input H was circulant? Answer: 0 
 ```
 
