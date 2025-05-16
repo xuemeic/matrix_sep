@@ -134,6 +134,7 @@ while count < max_iter && RelChg > eps
     coef = para_lasso.coef;
     % [m,n]./[m,1] will divide each col
     x = ifft(fft(rhs)./coef);
+    x = real(x);
     elseif (~para_lasso.isCirculant) && (para_lasso.decomp == "chol")
         L = para_lasso.L;
         y = L \ rhs;                    % y is lower triangular: n x p

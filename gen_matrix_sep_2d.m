@@ -61,6 +61,8 @@ if is_circulant(G1) && is_circulant(G2)
     para_lasso.coef = D1 * D2' + para.rho_inner;
 
 elseif para.is_E
+    isCirculant = true;
+    para_lasso.isCirculant = isCirculant;
     E1 = para.E1;
     E2 = para.E2;
     [n1, ~] = size(E1);
@@ -72,8 +74,7 @@ elseif para.is_E
     b = abs(fft(E2(:,1))).^2;
     Lc = kron(ones(m1/n1, m2/n2), a * b');
     para_lasso.coef = Lc + para.rho_inner;
-    isCirculant = true;
-    para_lasso.isCirculant = isCirculant;
+    
 
 else
 

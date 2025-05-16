@@ -6,7 +6,7 @@ n = 50;
 m = 50;
 p = 50;
 
-run `test_1d_avg.m`. No preconditioning.
+run `test_1d_avg.m`. 
 
 $$H=\begin{bmatrix}
 1&1&&&\\
@@ -18,11 +18,17 @@ $$H=\begin{bmatrix}
 
 Matlab output:
 ```
-Elapsed time is 0.148447 seconds.
+Elapsed time is 0.157968 seconds.
 Relative error of recovering L0: 1.184148e-03
 Relative error of recovering S0: 7.729501e-05
 Ran 113 many outer loops.
 Input H was circulant? Answer: 1 
+****** with preconditioning ******
+Elapsed time is 0.066149 seconds.
+Relative error of recovering L0: 2.522293e-05
+Relative error of recovering S0: 2.402050e-06
+Ran 41 many outer loops.
+Input H was circulant? Answer: 0 
 ```
 
 ### H is iid N(0, 1)

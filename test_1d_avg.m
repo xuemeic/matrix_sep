@@ -45,3 +45,17 @@ fprintf("Relative error of recovering L0: %e\n", rel_L);
 fprintf("Relative error of recovering S0: %e\n", rel_S);
 fprintf("Ran %g many outer loops.\n", output.count_outer);
 fprintf("Input H was circulant? Answer: %g \n", output.isCirc)
+
+fprintf("****** with preconditioning ******\n")
+[CH, C] = precondition(H);
+tic
+outputC = gen_matrix_sep(C*M0, CH, lam, para);
+toc
+Lhat = M0 - H*outputC.S;
+rel_L = norm(Lhat - L0, 'fro')/norm(L0, 'fro');
+rel_S = norm(outputC.S - S0, 'fro')/norm(S0, 'fro');
+fprintf("Relative error of recovering L0: %e\n", rel_L);
+fprintf("Relative error of recovering S0: %e\n", rel_S);
+fprintf("Ran %g many outer loops.\n", outputC.count_outer);
+fprintf("Input H was circulant? Answer: %g \n", outputC.isCirc)
+
