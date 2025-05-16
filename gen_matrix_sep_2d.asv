@@ -26,7 +26,7 @@ function output = gen_matrix_sep_2d(M, G1, G2, lam, para)
 
 % written by Owen Deen, 11/23/2024
 % updated on 4/22/2025
-% updated on 5/15/2025
+% updated on 5/15/2025: does not work using E1 and E2
 
 %%%%% pass the parameters
 rho_outer = para.rho_outer;
@@ -52,45 +52,37 @@ U = zeros(m1, m2, K);
 RelChg = 1;
 count_outer = 0;
 
-
-if is_circulant(G1) && is_circulant(G2)
-    isCirculant = true;
-    
-    D1 = abs(fft(G1(:,1))).^2;
-    D2 = abs(fft(G2(:,1))).^2;
-    para_lasso.coef = D1 * D2' + para.rho_inner;
-
-elseif para.is_E
-    isCirculant = true;
-    
+if para.is_E
+    isCirculant = 'block';
     E1 = para.E1;
     E2 = para.E2;
     [n1, ~] = size(E1);
     [n2, ~] = size(E2);
-    %isCirculant = true;
-    %para_lasso.isCirculant = isCirculant;
     
     a = abs(fft(E1(:,1))).^2;
     b = abs(fft(E2(:,1))).^2;
     Lc = kron(ones(m1/n1, m2/n2), a * b');
     para_lasso.coef = Lc + para.rho_inner;
+elseif is_circulant(G1) && is_circulant(G2)
+    isCirculant = true;
     
+    D1 = abs(fft(G1(:,1))).^2;
+    D2 = abs(fft(G2(:,1))).^2;
+    para_lasso.coef = D1 * D2' + para.rho_inner;
 else
-
     isCirculant = false;
-    
-
     % calculating svd of G1 and G2
     [~, S1, para_lasso.V1] = svd(G1' * G1);
-    S1 = diag(S1); % m1
+    S1 = diag(S1); % m1 by 1
  
-
     [~, S2, para_lasso.V2] = svd(G2' * G2);
-    S2 = diag(S2); % m2
+    S2 = diag(S2); % m2 by 1
+    para_lasso.Sig = S1 * S2'; % m1 by m2
 
-    para_lasso.Sig = S1 * S2'; %m1 by m2
-   
+
 end
+
+
 
 para_lasso.isCirculant = isCirculant;
 
@@ -144,7 +136,7 @@ output.RelChg_lasso = RelChg_lasso;
 output.isCirc = isCirculant;
 end
 
-%%%%%%%%%%%  lasso2 %%%%%%%%%%%%%%%%
+%%%%%%%%%%% lasso2 %%%%%%%%%%%%%%%%
 function [count, RelChg, S] = lasso2(G1, G2, Video, lambda, para_lasso)
 % Video = B: m1 x m2 x K
 % S = argmin_{X in p1p2 x K} {lambda||X||_1 + 0.5||H*X - vec(B)||_2}
@@ -267,6 +259,20 @@ function v = bilinear_framewise(V, left, right)
     LV = pagemtimes(left, V);        % Size: [p, m2_V, k]
 
     v = pagemtimes(LV, right);       % Size: [p, q, k]
+end
+
+function Y = bfft2(X, n1, n2)
+% X is m1 x m2 x K
+% ni divides mi
+% X[:,:,k] has (m1/n1) by (m2/n2) blocks and each block is X_ij
+% Y has the same shape as X and Y_ij = fft2(X_ij)
+Y = zeros(size(X));
+for i = 1:(m1/n1)
+    for j = 1:(m2/n2)
+        ridx = ((i-1)*n1+1):(i*n1);
+        cidx = ((j-1)*n2+1):(j*n2);
+        Y(ridx,cidx,:) = fft2(X(ridx,))
+
 end
 
 

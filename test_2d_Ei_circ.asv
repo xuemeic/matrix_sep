@@ -51,12 +51,7 @@ para.N_outer = 200;
 para.N_inner = 50;
 para.tol_outer = 1e-8;
 para.tol_inner = 1e-6;
-
-%%% setting is_E to be false forces SVD
 para.is_E = false;
-%%% setting is_E to be true activates block circulant, but takes longer
-%%% time
-%%% we should set is_E to be false unless n1 and n2 are big.
 para.E1 = E1;
 para.E2 = E2;
 lam =  1/sqrt(min(m1*m2, K));
@@ -72,8 +67,6 @@ fprintf("Relative error of recovering S0: %e\n", rel_S);
 fprintf("Ran %g many outer loops.\n", output.count_outer);
 fprintf("Input H was circulant? Answer: %g \n", output.isCirc)
 
-%%% with preconditioning always set is_E to be false.
-para.is_E = false;
 fprintf("****** with preconditioning ******\n")
 
 [CG1, C1] = precondition(G1);

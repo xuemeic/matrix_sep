@@ -52,29 +52,27 @@ U = zeros(m1, m2, K);
 RelChg = 1;
 count_outer = 0;
 
-
-if is_circulant(G1) && is_circulant(G2)
+if para.is_E
+    isCirculant = false;
+    E1 = para.E1;
+    E2 = para.E2;
+    [n1, ~] = size(E1);
+    [n2, ~] = size(E2);
+    
+    a = abs(fft(E1(:,1))).^2;
+    b = abs(fft(E2(:,1))).^2;
+    Lc = kron(ones(m1/n1, m2/n2), a * b');
+    para_lasso.L = Lc + para.rho_inner;
+    para_lasso.E = true;
+    para_lasso.E1 = E1;
+    para_lasso.E2 = E2;
+elseif is_circulant(G1) && is_circulant(G2)
     isCirculant = true;
     
     D1 = abs(fft(G1(:,1))).^2;
     D2 = abs(fft(G2(:,1))).^2;
     para_lasso.coef = D1 * D2' + para.rho_inner;
-
-elseif para.is_E
-    isCirculant = true;
-    
-    E1 = para.E1;
-    E2 = para.E2;
-    [n1, ~] = size(E1);
-    [n2, ~] = size(E2);
-    %isCirculant = true;
-    %para_lasso.isCirculant = isCirculant;
-    
-    a = abs(fft(E1(:,1))).^2;
-    b = abs(fft(E2(:,1))).^2;
-    Lc = kron(ones(m1/n1, m2/n2), a * b');
-    para_lasso.coef = Lc + para.rho_inner;
-    
+    para_lasso.E = false;
 else
     isCirculant = false;
     % calculating svd of G1 and G2
@@ -84,8 +82,12 @@ else
     [~, S2, para_lasso.V2] = svd(G2' * G2);
     S2 = diag(S2); % m2 by 1
     para_lasso.Sig = S1 * S2'; % m1 by m2
-   
+    para_lasso.E = false;
+
+
 end
+
+
 
 para_lasso.isCirculant = isCirculant;
 
@@ -170,11 +172,19 @@ while count < max_iter && RelChg > eps
 
     % update X: solve {H'*H + rho}X = H'*b + rho*(z - u)
     % H'*H = kron(V2, V1)*kron(sig2, sig1)*(kron(V2, V1))'
-    if para_lasso.isCirculant
+    if para_lasso.E && (para_lasso.isCirculant == false)
+        
+        coef = para_lasso.L;
+        [n1, ~] = size(para_lasso.E1);
+        [n2, ~] = size(para_lasso.E2);
+        X = bfft2(rhs, n1, n2)./coef;
+        X = real(bifft2(X, n1, n2));
+        
+    elseif para_lasso.isCirculant
         D = para_lasso.coef;
         X = real(ifft2(fft2(rhs)./D));
-      
-    else 
+        
+    else         
         V1 = para_lasso.V1;
         S = para_lasso.Sig; % m1 by m2
         V2 = para_lasso.V2;
@@ -183,7 +193,8 @@ while count < max_iter && RelChg > eps
 
         temp2 = temp ./ (S + rho);
         
-        X = bilinear_framewise(temp2, V1, V2');      
+        X = bilinear_framewise(temp2, V1, V2');   
+        
     end
 
     
@@ -262,6 +273,40 @@ function v = bilinear_framewise(V, left, right)
     LV = pagemtimes(left, V);        % Size: [p, m2_V, k]
 
     v = pagemtimes(LV, right);       % Size: [p, q, k]
+end
+
+function Y = bfft2(X, n1, n2)
+% X is m1 x m2 x K
+% ni divides mi
+% X[:,:,k] has (m1/n1) by (m2/n2) blocks and each block is X_ij
+% Y has the same shape as X and Y_ij = fft2(X_ij)
+Y = zeros(size(X));
+[m1, m2, ~] = size(X);
+for i = 1:(m1/n1)
+    for j = 1:(m2/n2)
+        ridx = ((i-1)*n1+1):(i*n1);
+        cidx = ((j-1)*n2+1):(j*n2);
+        Y(ridx,cidx,:) = fft2(X(ridx,cidx,:));
+    end
+end
+
+end
+
+function Y = bifft2(X, n1, n2)
+% X is m1 x m2 x K
+% ni divides mi
+% X[:,:,k] has (m1/n1) by (m2/n2) blocks and each block is X_ij
+% Y has the same shape as X and Y_ij = ifft2(X_ij)
+Y = zeros(size(X));
+[m1, m2, ~] = size(X);
+for i = 1:(m1/n1)
+    for j = 1:(m2/n2)
+        ridx = ((i-1)*n1+1):(i*n1);
+        cidx = ((j-1)*n2+1):(j*n2);
+        Y(ridx,cidx,:) = ifft2(X(ridx,cidx,:));
+    end
+end
+
 end
 
 

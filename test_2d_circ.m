@@ -1,27 +1,15 @@
-% E1, E2 will be circulant
-
-m1 = 20;
-m2 = 30;
+m1 = 10;
 p1 = m1;
+m2 = 9;
 p2 = m2;
-K = 100;
+K = 50;
 
-n1 = 2;
 rng(3);
-E1r1 = rand(1, n1); 
-E1r1 = E1r1/sum(E1r1); % First row of the circulant matrix 
-E1 = toeplitz([E1r1(1), fliplr(E1r1(2:end))], E1r1); 
-% E1 will have row sum to be 1
+G1r1 = randn(1, m1);  % First row of the circulant matrix 
+G1 = toeplitz([G1r1(1), fliplr(G1r1(2:end))], G1r1); 
 
-n2 = 3;
-E2r1 = rand(1, n2); 
-E2r1 = E2r1/sum(E2r1); % First row of the circulant matrix 
-E2 = toeplitz([E2r1(1), fliplr(E2r1(2:end))], E2r1); 
-E2 = E2';
-% E2 will have column sum to be 1
-
-G1 = kron(eye(m1/n1), E1);
-G2 = kron(eye(m2/n2), E2);
+G2r1 = rand(1, m2);  % First row of the circulant matrix 
+G2 = toeplitz([G2r1(1), fliplr(G2r1(2:end))], G2r1); 
 
 % make S0
 num_elements = p1 * p2;
@@ -51,15 +39,9 @@ para.N_outer = 200;
 para.N_inner = 50;
 para.tol_outer = 1e-8;
 para.tol_inner = 1e-6;
-
-%%% setting is_E to be false forces SVD
 para.is_E = false;
-%%% setting is_E to be true activates block circulant, but takes longer
-%%% time
-%%% we should set is_E to be false unless n1 and n2 are big.
-para.E1 = E1;
-para.E2 = E2;
 lam =  1/sqrt(min(m1*m2, K));
+
 
 tic
 output = gen_matrix_sep_2d(M0, G1, G2, lam, para);
@@ -72,8 +54,6 @@ fprintf("Relative error of recovering S0: %e\n", rel_S);
 fprintf("Ran %g many outer loops.\n", output.count_outer);
 fprintf("Input H was circulant? Answer: %g \n", output.isCirc)
 
-%%% with preconditioning always set is_E to be false.
-para.is_E = false;
 fprintf("****** with preconditioning ******\n")
 
 [CG1, C1] = precondition(G1);
