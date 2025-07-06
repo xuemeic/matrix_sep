@@ -29,6 +29,8 @@ function output = gen_matrix_sep_2d(M, G1, G2, lam, para)
 % updated on 5/15/2025: does not work using E1 and E2
 % updated on 5/16/2025: Ei work now. In genral, recommend to set para.is_E
 % = false
+% updated on 7/5/2025: bilinear_framewise(Video, G1', G2) is computed
+% outside of loop
 
 %%%%% pass the parameters
 rho_outer = para.rho_outer;
@@ -165,12 +167,13 @@ U = X;
 count = 0;
 RelChg = 1;
 eps = para_lasso.tol;
+rhs0 = bilinear_framewise(Video, G1', G2);
 
 while count < max_iter && RelChg > eps
     Zlast = Z;
     Xlast = X;
     
-    rhs = bilinear_framewise(Video, G1', G2) + rho*(Z - U);
+    rhs = rhs0 + rho*(Z - U);
 
     % update X: solve {H'*H + rho}X = H'*b + rho*(z - u)
     % H'*H = kron(V2, V1)*kron(sig2, sig1)*(kron(V2, V1))'

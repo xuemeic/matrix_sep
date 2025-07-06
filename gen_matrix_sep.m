@@ -20,6 +20,7 @@ function output = gen_matrix_sep(M, H, lam, para)
 % - isCirc: TRUE or FALSE. TRUE if H is circulant.
 % updated on 4/9/2025
 % updated on 4/21/2025
+% updated on 7/5/2025: precompute A^Tb outside of loop
 
 %%%%% pass the parameters
 rho_outer = para.rho_outer;
@@ -121,13 +122,13 @@ u = zeros(m, k);
 count = 0;
 RelChg = 1;
 eps = para_lasso.tol;
-%coef = A'*A + rho*eye(n);
+Atb = A'*b;
 
 while count < max_iter && RelChg > eps
     zlast = z;
     xlast = x;
 
-    rhs = A'*b + rho*(z - u);
+    rhs = Atb + rho*(z - u);
     % update x
     if para_lasso.isCirculant
     
