@@ -96,15 +96,15 @@ Gi = kron(eye(mi/ni), Ei); Each Ei is NOT circulant.
 
 Matlab output
 ```
-Elapsed time is 10.361942 seconds.
-Relative error of recovering L0: 9.692872e+00
-Relative error of recovering S0: 7.731320e-01
-Ran 200 many outer loops.
+Elapsed time is 4.743561 seconds.
+Relative error of recovering L0: 1.615380e+01
+Relative error of recovering S0: 8.527813e-01
+Ran 104 many outer loops.
 Input H was circulant? Answer: 0 
 ****** with preconditioning ******
-Elapsed time is 1.087051 seconds.
-Relative error of recovering L0: 6.570278e-07
-Relative error of recovering S0: 1.708588e-08
+Elapsed time is 0.832217 seconds.
+Relative error of recovering L0: 6.747744e-07
+Relative error of recovering S0: 1.704130e-08
 Ran 38 many outer loops.
 Input H was circulant? Answer: 0 
 ```

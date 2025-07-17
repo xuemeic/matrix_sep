@@ -72,7 +72,6 @@ fprintf("****** with preconditioning ******\n")
 [CG2, C2] = precondition(G2);
 CM0 = pagemtimes(pagemtimes(C1, M0), C2');
 
-para.is_E = false;
 tic
 outputC = gen_matrix_sep_2d(CM0, CG1, CG2, lam, para);
 toc

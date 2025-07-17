@@ -31,6 +31,7 @@ function output = gen_matrix_sep_2d(M, G1, G2, lam, para)
 % = false
 % updated on 7/5/2025: bilinear_framewise(Video, G1', G2) is computed
 % outside of loop
+% updated on 7/17/2025: E1, E2 don't have to be circulant
 
 %%%%% pass the parameters
 rho_outer = para.rho_outer;
@@ -56,20 +57,35 @@ U = zeros(m1, m2, K);
 RelChg = 1;
 count_outer = 0;
 
-if para.is_E
-    isCirculant = false;
+if para.is_E 
+    para_lasso.E = true;
     E1 = para.E1;
     E2 = para.E2;
-    [n1, ~] = size(E1);
-    [n2, ~] = size(E2);
-    
-    a = abs(fft(E1(:,1))).^2;
-    b = abs(fft(E2(:,1))).^2;
-    Lc = kron(ones(m1/n1, m2/n2), a * b');
-    para_lasso.L = Lc + para.rho_inner;
-    para_lasso.E = true;
     para_lasso.E1 = E1;
     para_lasso.E2 = E2;
+    [n1, ~] = size(E1);
+    [n2, ~] = size(E2);
+    if is_circulant(E1) && is_circulant(E2) %case 1
+        isCirculant = true;
+        d1 = abs(fft(E1(:,1))).^2;
+        d2 = abs(fft(E2(:,1))).^2;
+        Lc = kron(ones(m1/n1, m2/n2), d1 * d2');
+        para_lasso.L = Lc + para.rho_inner;
+    else % case 2
+        isCirculant = false;
+        [~, eS1, W1] = svd(E1' * E1);
+        S1 = kron(eye(m1/n1), eS1);
+        S1 = diag(S1); % m1 by 1
+        para_lasso.V1 = kron(eye(m1/n1), W1);
+
+        [~, eS2, W2] = svd(E2' * E2);
+        S2 = kron(eye(m2/n2), eS2);
+        S2 = diag(S2); % m2 by 1
+        para_lasso.V2 = kron(eye(m2/n2), W2);
+        para_lasso.Sig = S1 * S2'; % m1 by m2
+    end
+    
+    
 elseif is_circulant(G1) && is_circulant(G2)
     isCirculant = true;
     
@@ -177,15 +193,16 @@ while count < max_iter && RelChg > eps
 
     % update X: solve {H'*H + rho}X = H'*b + rho*(z - u)
     % H'*H = kron(V2, V1)*kron(sig2, sig1)*(kron(V2, V1))'
-    if para_lasso.E && (para_lasso.isCirculant == false)
+    if para_lasso.E && para_lasso.isCirculant % case 1
         
         coef = para_lasso.L;
         [n1, ~] = size(para_lasso.E1);
         [n2, ~] = size(para_lasso.E2);
         X = bfft2(rhs, n1, n2)./coef;
         X = real(bifft2(X, n1, n2));
+    %elseif para_lasso.E && (para_lasso.isCirculant == false) % case 2
         
-    elseif para_lasso.isCirculant
+    elseif (para_lasso.E == false) && para_lasso.isCirculant
         D = para_lasso.coef;
         X = real(ifft2(fft2(rhs)./D));
         
