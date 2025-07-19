@@ -1,10 +1,9 @@
 % test on recover H, L from M0 = L0 + H*S0
-% no preconditioning is applied
 % Make H: averaging filter
 
-n = 50;
-m = 50;
-p = 50;
+n = 100;
+m = n - 1;
+p = m;
 
 first_row = [1 1 zeros(1, m - 2)]; % First row of the circulant matrix H
 H = toeplitz([first_row(1), fliplr(first_row(2:end))], first_row); 
@@ -47,15 +46,13 @@ fprintf("Ran %g many outer loops.\n", output.count_outer);
 fprintf("Input H was circulant? Answer: %g \n", output.isCirc)
 
 fprintf("****** with preconditioning ******\n")
-[CH, C] = precondition(H);
 tic
-outputC = gen_matrix_sep(C*M0, CH, lam, para);
+outputC = gen_matrix_sep_con(M0, H, lam, para);
 toc
-Lhat = M0 - H*outputC.S;
-rel_L = norm(Lhat - L0, 'fro')/norm(L0, 'fro');
-rel_S = norm(outputC.S - S0, 'fro')/norm(S0, 'fro');
-fprintf("Relative error of recovering L0: %e\n", rel_L);
-fprintf("Relative error of recovering S0: %e\n", rel_S);
+rel_L_c = norm(outputC.L - L0, 'fro')/norm(L0, 'fro');
+rel_S_c = norm(outputC.S - S0, 'fro')/norm(S0, 'fro');
+fprintf("Relative error of recovering L0: %e\n", rel_L_c);
+fprintf("Relative error of recovering S0: %e\n", rel_S_c);
 fprintf("Ran %g many outer loops.\n", outputC.count_outer);
-fprintf("Input H was circulant? Answer: %g \n", outputC.isCirc)
+fprintf("Input H was circulant? Answer: %g \n\n", outputC.isCirc)
 

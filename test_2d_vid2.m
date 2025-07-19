@@ -1,6 +1,8 @@
 % test on a cropped video where each frame is 48 by 48
-% E1 is circulant but 2 by 2
-% E2 is circulant but 3 by 3
+% E1 is circulant 16 by 16
+% E2 is circulant 24 by 24
+% This experiment runs about 30 seconds
+% para.is_E = true or false does not make a difference
 
 
 load('data/video.mat'); % get V: 240 by 320 by 300
@@ -23,16 +25,25 @@ V_cropped = V(row_range, col_range, :);
 
 [m1, m2, K] = size(V_cropped); % 48 x 48 x 300
 
-n1 = 2;
+n1 = 16;
 rng(3);
 
 E1r1 = rand(1, n1); 
+b = sort(E1r1);
+n1_h = floor(n1/2);
+newidx = reshape(reshape([linspace(1, n1_h, n1_h), linspace(n1, n1_h+1, n1_h)], [n1_h, 2])', [n1,1]);
+E1r1(newidx) = b;
 E1r1 = E1r1/sum(E1r1); % First row of the circulant matrix 
 E1 = toeplitz([E1r1(1), fliplr(E1r1(2:end))], E1r1); 
 % E1 will have row sum to be 1
 
-n2 = 3;
+n2 = 24;
 E2r1 = rand(1, n2); 
+b = sort(E2r1);
+n2_h = floor(n2/2);
+newidx = reshape(reshape([linspace(1, n2_h, n2_h), linspace(n2, n2_h+1, n2_h)], [n2_h, 2])', [n2,1]);
+E2r1(newidx) = b;
+
 E2r1 = E2r1/sum(E2r1); % First row of the circulant matrix 
 E2 = toeplitz([E2r1(1), fliplr(E2r1(2:end))], E2r1); 
 E2 = E2';
@@ -41,14 +52,12 @@ E2 = E2';
 G1 = kron(eye(m1/n1), E1);
 G2 = kron(eye(m2/n2), E2);
 
-% preconditioning is applied
-
 
 M0 = pagemtimes(pagemtimes(G1, V_cropped), G2');
 % M0 is very blurred
 
-M = -M0 + pagemtimes(pagemtimes(G1, ones(size(M0))), G2');
-%CM = pagemtimes(pagemtimes(C1, M), C2');
+M = - M0 + pagemtimes(pagemtimes(G1, ones(size(M0))), G2');
+
 
 para.rho_outer = 1;
 para.rho_inner = 1;
@@ -56,9 +65,12 @@ para.N_outer = 100;
 para.N_inner = 30;
 para.tol_outer = 1e-8;
 para.tol_inner = 1e-6;
-para.is_E = false;
+para.is_E = true;
+para.E1 = E1;
+para.E2 = E2;
 lam =  1/sqrt(min(m1*m2, K))*0.2;
 
+% preconditioning is applied
 tic
 outputC = gen_matrix_sep_2d_con(M, G1, G2, lam, para);
 toc

@@ -1,5 +1,6 @@
 % Gi = kron(eye(mi/ni), Ei);
-% E1, E2 will not be circulant
+% E1, E2 will be circulant
+% but n1 and n2 are relatively big
 
 m1 = 20;
 m2 = 30;
@@ -7,17 +8,19 @@ p1 = m1;
 p2 = m2;
 K = 100;
 
-n1 = 2;
+n1 = 10;
 rng(3);
-
-E1 = rand(n1, n1);
-E1 = E1./sum(E1, 2);
+E1r1 = rand(1, n1); 
+E1r1 = E1r1/sum(E1r1); % First row of the circulant matrix 
+E1 = toeplitz([E1r1(1), fliplr(E1r1(2:end))], E1r1); 
 % E1 will have row sum to be 1
 
-n2 = 3;
-E2 = rand(n2, n2);
-E2 = E2./sum(E2, 2);
-% E2 will have row sum to be 1
+n2 = 10;
+E2r1 = rand(1, n2); 
+E2r1 = E2r1/sum(E2r1); % First row of the circulant matrix 
+E2 = toeplitz([E2r1(1), fliplr(E2r1(2:end))], E2r1); 
+E2 = E2';
+% E2 will have column sum to be 1
 
 G1 = kron(eye(m1/n1), E1);
 G2 = kron(eye(m2/n2), E2);
@@ -47,9 +50,14 @@ M0 = L0 + pagemtimes(pagemtimes(G1, S0), G2');
 para.rho_outer = 1; % smaller rho results fewer iterations
 para.rho_inner = 1; % 10 runs longer
 para.N_outer = 200;
-para.N_inner = 50;
+para.N_inner = 30;
 para.tol_outer = 1e-8;
 para.tol_inner = 1e-6;
+
+%%% setting is_E to be false forces SVD
+%%% setting is_E to be true activates block circulant, but takes longer
+%%% time
+%%% we should set is_E to be false unless n1 and n2 are big.
 para.is_E = true;
 para.E1 = E1;
 para.E2 = E2;
@@ -66,19 +74,13 @@ fprintf("Relative error of recovering S0: %e\n", rel_S);
 fprintf("Ran %g many outer loops.\n", output.count_outer);
 fprintf("Input H was circulant? Answer: %g \n", output.isCirc)
 
+
 fprintf("****** with preconditioning ******\n")
-
-[CG1, C1] = precondition(G1);
-[CG2, C2] = precondition(G2);
-CM0 = pagemtimes(pagemtimes(C1, M0), C2');
-
 tic
-outputC = gen_matrix_sep_2d(CM0, CG1, CG2, lam, para);
+outputC = gen_matrix_sep_2d_con(M0, G1, G2, lam, para);
 toc
-HS_output = pagemtimes(pagemtimes(G1, outputC.S), G2');
 
-L_output = M0 - HS_output;
-rel_Lc = norm(L_output - L0, 'fro')/norm(L0, 'fro');
+rel_Lc = norm(outputC.L - L0, 'fro')/norm(L0, 'fro');
 rel_Sc = norm(outputC.S - S0, 'fro')/norm(S0, 'fro');
 fprintf("Relative error of recovering L0: %e\n", rel_Lc);
 fprintf("Relative error of recovering S0: %e\n", rel_Sc);

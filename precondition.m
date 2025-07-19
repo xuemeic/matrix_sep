@@ -1,8 +1,8 @@
-function [Hc, M] = precondition(H)
+function [Hc, C] = precondition(H)
 % H is arbitrary matrix: m by n
 % ker(H) = ker(Hc)
 % cond(Hc) = 1
-% M*H = Hc
+% C*H = Hc
 [u, s, v] = svd(H);
 k = rank(H);
 u = u(:,1:k); % m by k
@@ -11,4 +11,4 @@ Hc = u*v'; % m by n
 s = diag(s); % a vector
 s_inv = 1./s(1:k);
 
-M = u*diag(s_inv)*u';
+C = u*diag(s_inv)*u';

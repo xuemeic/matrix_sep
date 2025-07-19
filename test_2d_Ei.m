@@ -66,20 +66,14 @@ fprintf("Relative error of recovering S0: %e\n", rel_S);
 fprintf("Ran %g many outer loops.\n", output.count_outer);
 fprintf("Input H was circulant? Answer: %g \n", output.isCirc)
 
-fprintf("****** with preconditioning ******\n")
-
-[CG1, C1] = precondition(G1);
-[CG2, C2] = precondition(G2);
-CM0 = pagemtimes(pagemtimes(C1, M0), C2');
 
 para.is_E = false;
+fprintf("****** with preconditioning ******\n")
 tic
-outputC = gen_matrix_sep_2d(CM0, CG1, CG2, lam, para);
+outputC = gen_matrix_sep_2d_con(M0, G1, G2, lam, para);
 toc
-HS_output = pagemtimes(pagemtimes(G1, outputC.S), G2');
 
-L_output = M0 - HS_output;
-rel_Lc = norm(L_output - L0, 'fro')/norm(L0, 'fro');
+rel_Lc = norm(outputC.L - L0, 'fro')/norm(L0, 'fro');
 rel_Sc = norm(outputC.S - S0, 'fro')/norm(S0, 'fro');
 fprintf("Relative error of recovering L0: %e\n", rel_Lc);
 fprintf("Relative error of recovering S0: %e\n", rel_Sc);

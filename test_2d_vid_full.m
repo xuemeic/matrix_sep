@@ -36,15 +36,13 @@ E2 = E2';
 G1 = kron(eye(m1/n1), E1);
 G2 = kron(eye(m2/n2), E2);
 
-% preconditioning is appliedm
-[CG1, C1] = precondition(G1);
-[CG2, C2] = precondition(G2);
+
 
 M0 = pagemtimes(pagemtimes(G1, V), G2');
 % M0 is very blurred
 
-M = -M0 + pagemtimes(pagemtimes(G1, ones(size(M0))), G2');
-CM = pagemtimes(pagemtimes(C1, M), C2');
+M = - M0 + pagemtimes(pagemtimes(G1, ones(size(M0))), G2');
+
 
 para.rho_outer = 1;
 para.rho_inner = 1;
@@ -60,10 +58,8 @@ para.is_E = false;
 lam =  1/sqrt(min(m1*m2, K))*0.2;
 
 tic
-outputC = gen_matrix_sep_2d(CM, CG1, CG2, lam, para);
+outputC = gen_matrix_sep_2d_con(M, G1, G2, lam, para);
 toc
-HS_output = pagemtimes(pagemtimes(G1, outputC.S), G2');
-L_output = M - HS_output;
 
 %%
 figure(1)
@@ -78,7 +74,7 @@ subplot(1, 4, 3)
 imshow(1-outputC.S(:,:, k), [])
 title('deblurred sparse component')
 subplot(1, 4, 4)
-imshow(-L_output(:,:, k), [])
+imshow(-outputC.L(:,:, k), [])
 title('background')
 %%
 %save('results/full_vid.mat', "outputC", "V", "M0", "L_output")

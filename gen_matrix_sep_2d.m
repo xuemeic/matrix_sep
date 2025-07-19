@@ -23,6 +23,7 @@ function output = gen_matrix_sep_2d(M, G1, G2, lam, para)
 % - L: m1 x m2 x K
 % - S: p1 x p2 x K
 % - count_outer
+% - isCirc
 
 % written by Owen Deen, 11/23/2024
 % updated on 4/22/2025
@@ -32,6 +33,7 @@ function output = gen_matrix_sep_2d(M, G1, G2, lam, para)
 % updated on 7/5/2025: bilinear_framewise(Video, G1', G2) is computed
 % outside of loop
 % updated on 7/17/2025: E1, E2 don't have to be circulant
+% updated on 7/19/2025: changed output
 
 %%%%% pass the parameters
 rho_outer = para.rho_outer;
@@ -65,7 +67,7 @@ if para.is_E
     para_lasso.E2 = E2;
     [n1, ~] = size(E1);
     [n2, ~] = size(E2);
-    if is_circulant(E1) && is_circulant(E2) %case 1
+    if is_circulant(E1) && is_circulant(E2) % case 1
         isCirculant = true;
         d1 = abs(fft(E1(:,1))).^2;
         d2 = abs(fft(E2(:,1))).^2;
@@ -123,7 +125,7 @@ while RelChg > tol_outer && count_outer < N_outer
     L = reshape(L, [m1, m2, K]);
     
     
-    [count_inner,RelChg_lasso, S] = lasso2(G1, G2, M - U - L, lam/rho_outer, para_lasso);
+    [~,~, S] = lasso2(G1, G2, M - U - L, lam/rho_outer, para_lasso);
     
     HS = bilinear_framewise(S, G1, G2');
     U = U + L + HS - M;
@@ -149,15 +151,12 @@ end
 output.L = L;
 output.S = S;
 output.count_outer = count_outer;
-output.count_inner = count_inner;
-output.relchg = RelChg;
-output.relchg_top = top;
-output.relchg_bottom = bottom;
-output.Ldn = Ldn;
-output.Sdn = Sdn;
-output.Ln = Ln;
-output.Sn = Sn;
-output.RelChg_lasso = RelChg_lasso;
+%output.count_inner = count_inner;
+%output.relchg = RelChg;
+
+%output.Ln = Ln;
+%output.Sn = Sn;
+%output.RelChg_lasso = RelChg_lasso;
 output.isCirc = isCirculant;
 end
 
