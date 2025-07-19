@@ -1,9 +1,9 @@
 % test on recover H, L from M0 = L0 + H*S0
 % Make H: random filter
 
-n = 100;
-m = 90;
-p = 96;
+n = 300;
+m = 270;
+p = 296;
 
 rng(30);
 H = randn(m, p);
@@ -16,6 +16,7 @@ S0(nonzero_idx) = rand(s*n, 1) + 1;
 
 % Make L
 rank_r = floor(min(m, n)*0.05);
+%rank_r = 5;
 L1 = randn([m, rank_r]);  % m x r matrix
 L1 = orth(L1);
 L2 = randn([n, rank_r]);  % r x n matrix
@@ -25,7 +26,7 @@ L0 = L1*L2';
 
 % recover
 M0 = L0 + H*S0;
-para.rho_outer = 0.5; 
+para.rho_outer = 1; 
 para.rho_inner = 1; 
 para.N_outer = 500;
 para.N_inner = 30;

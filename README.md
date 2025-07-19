@@ -2,14 +2,14 @@
 
 ## 1D
 ### H is the average filter
-n = 100;
+n = 300;
 m = n - 1;
 p = m;
 
 run `test_1d_avg.m`. 
 
 $$H=\begin{bmatrix}
-1&1&&&\\
+-1&1&&&\\
 &1&1&&\\
 &&1&\ddots&\\
 &&&\ddots&1\\
@@ -18,38 +18,38 @@ $$H=\begin{bmatrix}
 
 Matlab output:
 ```
-Elapsed time is 0.394646 seconds.
-Relative error of recovering L0: 1.080165e-03
-Relative error of recovering S0: 7.129873e-05
-Ran 73 many outer loops.
+Elapsed time is 2.596634 seconds.
+Relative error of recovering L0: 1.061305e-03
+Relative error of recovering S0: 6.752538e-05
+Ran 44 many outer loops.
 Input H was circulant? Answer: 1 
 ****** with preconditioning ******
-Elapsed time is 0.119330 seconds.
-Relative error of recovering L0: 1.901153e-05
-Relative error of recovering S0: 1.823486e-06
-Ran 25 many outer loops.
+Elapsed time is 1.717878 seconds.
+Relative error of recovering L0: 1.543082e-05
+Relative error of recovering S0: 1.982391e-06
+Ran 28 many outer loops.
 Input H was circulant? Answer: 0 
 ```
 
 ### H is iid N(0, 1)
-n = 100;
-m = 90;
-p = 96;
+n = 300;
+m = 270;
+p = 296;
 
 run `test_1d_randn.m`. 
 
 Matlab output:
 ```
-Elapsed time is 2.433660 seconds.
-Relative error of recovering L0: 8.103113e-01
-Relative error of recovering S0: 9.749426e-03
+Elapsed time is 47.512058 seconds.
+Relative error of recovering L0: 9.074533e-01
+Relative error of recovering S0: 9.034722e-03
 Ran 500 many outer loops.
 Input H was circulant? Answer: 0 
 ****** with preconditioning ******
-Elapsed time is 0.347301 seconds.
-Relative error of recovering L0: 1.394194e-04
-Relative error of recovering S0: 3.390611e-06
-Ran 106 many outer loops.
+Elapsed time is 7.692492 seconds.
+Relative error of recovering L0: 1.439028e-04
+Relative error of recovering S0: 3.146452e-06
+Ran 96 many outer loops.
 Input H was circulant? Answer: 0 
 ```
 

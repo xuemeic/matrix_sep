@@ -1,11 +1,11 @@
 % test on recover H, L from M0 = L0 + H*S0
 % Make H: averaging filter
 
-n = 100;
+n = 300;
 m = n - 1;
 p = m;
 
-first_row = [1 1 zeros(1, m - 2)]; % First row of the circulant matrix H
+first_row = [-1 1 zeros(1, m - 2)]; % First row of the circulant matrix H
 H = toeplitz([first_row(1), fliplr(first_row(2:end))], first_row); 
 
 rng(2);
