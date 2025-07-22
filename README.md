@@ -10,10 +10,10 @@ run `test_1d_avg.m`.
 
 $$H=\begin{bmatrix}
 -1&1&&&\\
-&1&1&&\\
-&&1&\ddots&\\
+&-1&1&&\\
+&&-1&\ddots&\\
 &&&\ddots&1\\
-1&&&&1
+1&&&&-1
 \end{bmatrix}.$$
 
 Matlab output:
