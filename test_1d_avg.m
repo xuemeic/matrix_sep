@@ -10,7 +10,7 @@ H = toeplitz([first_row(1), fliplr(first_row(2:end))], first_row);
 
 rng(2);
 % Make S0
-s = 2;
+s = 15;
 S0 = zeros(p, n);
 nonzero_idx = randsample(p*n, s*n);
 S0(nonzero_idx) = rand(s*n, 1) + 1;
@@ -26,7 +26,7 @@ L0 = L1*L2';
 
 % recover
 M0 = L0 + H*S0;
-para.rho_outer = 0.5; 
+para.rho_outer = 1; 
 para.rho_inner = 1; 
 para.N_outer = 500;
 para.N_inner = 30;

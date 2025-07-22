@@ -18,15 +18,15 @@ $$H=\begin{bmatrix}
 
 Matlab output:
 ```
-Elapsed time is 2.596634 seconds.
-Relative error of recovering L0: 1.061305e-03
-Relative error of recovering S0: 6.752538e-05
-Ran 44 many outer loops.
+Elapsed time is 31.496404 seconds.
+Relative error of recovering L0: 1.500221e-03
+Relative error of recovering S0: 4.986135e-04
+Ran 500 many outer loops.
 Input H was circulant? Answer: 1 
 ****** with preconditioning ******
-Elapsed time is 1.717878 seconds.
-Relative error of recovering L0: 1.543082e-05
-Relative error of recovering S0: 1.982391e-06
+Elapsed time is 2.878626 seconds.
+Relative error of recovering L0: 2.379997e-05
+Relative error of recovering S0: 2.141106e-06
 Ran 28 many outer loops.
 Input H was circulant? Answer: 0 
 ```
@@ -40,16 +40,16 @@ run `test_1d_randn.m`.
 
 Matlab output:
 ```
-Elapsed time is 47.512058 seconds.
-Relative error of recovering L0: 9.074533e-01
-Relative error of recovering S0: 9.034722e-03
+Elapsed time is 50.797600 seconds.
+Relative error of recovering L0: 8.633890e-01
+Relative error of recovering S0: 3.132586e-03
 Ran 500 many outer loops.
 Input H was circulant? Answer: 0 
 ****** with preconditioning ******
-Elapsed time is 7.692492 seconds.
-Relative error of recovering L0: 1.439028e-04
-Relative error of recovering S0: 3.146452e-06
-Ran 96 many outer loops.
+Elapsed time is 6.419518 seconds.
+Relative error of recovering L0: 3.337300e-04
+Relative error of recovering S0: 8.266345e-07
+Ran 99 many outer loops.
 Input H was circulant? Answer: 0 
 ```
 

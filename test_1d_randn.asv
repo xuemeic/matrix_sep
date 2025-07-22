@@ -3,13 +3,13 @@
 
 n = 300;
 m = 270;
-p = 266;
+p = 26;
 
 rng(30);
 H = randn(m, p);
 
 % Make S0
-s = 13;
+s = 2;
 S0 = zeros(p, n);
 nonzero_idx = randsample(p*n, s*n);
 S0(nonzero_idx) = rand(s*n, 1) + 1;
