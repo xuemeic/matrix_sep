@@ -1,7 +1,7 @@
 % test on recover H, L from M0 = L0 + H*S0
 % Make H: averaging filter
 
-n = 300;
+n = 100;
 m = n - 1;
 p = m;
 
@@ -9,6 +9,8 @@ first_row = [-1 1 zeros(1, m - 2)]; % First row of the circulant matrix H
 H = toeplitz([first_row(1), fliplr(first_row(2:end))], first_row); 
 
 rng(2);
+%H = randn(m, p);
+
 % Make S0
 s = 15;
 S0 = zeros(p, n);
@@ -26,33 +28,51 @@ L0 = L1*L2';
 
 % recover
 M0 = L0 + H*S0;
+clear para
 para.rho_outer = 1; 
-para.rho_inner = 1; 
-para.N_outer = 500;
-para.N_inner = 30;
+para.lasso_rho = 1; 
+para.max_iter = 500;
+para.lasso_max_iter = 20;
 para.tol_outer = 1e-7;
-para.tol_inner = 1e-5;
-para.decomp = "svd"; 
+para.lasso_tol = 1e-5;
+para.lasso_method = 'ADMM';
+para.lasso_decomp = "svd"; 
+para.preconditioned = false;
 lam =  1/sqrt(m);
-tic
-output = gen_matrix_sep(M0, H, lam, para);
-toc
 
-rel_L = norm(output.L - L0, 'fro')/norm(L0, 'fro');
-rel_S = norm(output.S - S0, 'fro')/norm(S0, 'fro');
-fprintf("Relative error of recovering L0: %e\n", rel_L);
-fprintf("Relative error of recovering S0: %e\n", rel_S);
-fprintf("Ran %g many outer loops.\n", output.count_outer);
-fprintf("Input H was circulant? Answer: %g \n", output.isCirc)
-
-fprintf("****** with preconditioning ******\n")
 tic
 outputC = gen_matrix_sep_con(M0, H, lam, para);
-toc
+t = toc;
+if outputC.para.preconditioned
+    sp = "with preconditioning";
+else
+    sp = "no preconditioning";
+end
+fprintf("******* %s, lasso by %s ******\n", sp, outputC.para.lasso_method)
+fprintf("Number of iterations: %g.\n", outputC.count_outer);
+fprintf("Duration: %.3f seconds.\n", t)
 rel_L_c = norm(outputC.L - L0, 'fro')/norm(L0, 'fro');
 rel_S_c = norm(outputC.S - S0, 'fro')/norm(S0, 'fro');
 fprintf("Relative error of recovering L0: %e\n", rel_L_c);
-fprintf("Relative error of recovering S0: %e\n", rel_S_c);
-fprintf("Ran %g many outer loops.\n", outputC.count_outer);
-fprintf("Input H was circulant? Answer: %g \n\n", outputC.isCirc)
+fprintf("Relative error of recovering S0: %e\n\n", rel_S_c);
+
+
+
+para.lasso_method = 'FISTA';
+tic
+outputf = gen_matrix_sep_con(M0, H, lam, para);
+t = toc;
+if outputf.para.preconditioned
+    sp = "with preconditioning";
+else
+    sp = "no preconditioning";
+end
+fprintf("******* %s, lasso by %s ******\n", sp, outputf.para.lasso_method)
+fprintf("Number of iterations: %g.\n", outputf.count_outer);
+fprintf("Duration: %.3f seconds.\n", t)
+rel_L_c = norm(outputf.L - L0, 'fro')/norm(L0, 'fro');
+rel_S_c = norm(outputf.S - S0, 'fro')/norm(S0, 'fro');
+fprintf("Relative error of recovering L0: %e\n", rel_L_c);
+fprintf("Relative error of recovering S0: %e\n\n", rel_S_c);
+
 

@@ -33,7 +33,7 @@ function output = gen_matrix_sep(M, H, lam, para)
 
 [m, n] = size(M);
 [~, p] = size(H);
-%% default parameter values
+%% default parameters
 rho_outer_default = 1;
 max_iter_default = 200;
 tol_outer_default = 1e-7;
@@ -45,30 +45,37 @@ if ~isfield(para, 'preconditioned')
 end
 
 if ~isfield(para,'rho_outer')
-    para.rho_outer = rho_outer_default;        
+    rho_outer = rho_outer_default;
+    para.rho_outer = rho_outer;
+    rho_outer = para.rho_outer;
 end
 
 if ~isfield(para, 'max_iter')
-    para.max_iter = max_iter_default;    
+    N_outer = max_iter_default;
+else
+    N_outer = para.max_iter;
 end
 
-if ~isfield(para, 'tol_outer')
-    para.tol_outer = tol_outer_default;   
+if ~ isfield(para, 'tol_outer')
+    tol_outer = tol_outer_default;
+else
+    tol_outer = para.tol_outer;
 end
 
 if ~ isfield(para, 'lasso_method')
-    para.lasso_method = lasso_method_default;   
+    lasso_method = lasso_method_default;
+    para.lasso_method = lasso_method;
+else
+    lasso_method = para.lasso_method;
 end
 
 if ~ isfield(para, 'lasso_decomp')
-    para.lasso_decomp = lasso_decomp_default; 
+    lasso_decomp = lasso_decomp_default;
+else
+    lasso_decomp = para.lasso_decomp;
 end
 
-rho_outer = para.rho_outer;
-N_outer = para.max_iter;
-tol_outer = para.tol_outer;
-lasso_method = para.lasso_method;
-lasso_decomp = para.lasso_decomp;
+
 %% parameters for my_lasso()
 para_lasso.max_iter = para.lasso_max_iter;
 para_lasso.rho = para.lasso_rho; % if method is ADMM
@@ -82,7 +89,7 @@ para_lasso.decomp = lasso_decomp; % default value
 if strcmp(lasso_method, 'FISTA')
     % FISTA
     % H circulant does not matter
-    %isCirculant = [];
+    isCirculant = [];
     if para.preconditioned
         para_lasso.L = 1; % this is biggest singular value of H'H
     else
@@ -119,6 +126,8 @@ end
 
 
 %% initialization and main loop
+
+
 L = zeros(m, n);
 S = zeros(p, n);
 U = zeros(m, n);

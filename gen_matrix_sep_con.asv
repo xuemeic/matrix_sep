@@ -18,8 +18,8 @@ function output = gen_matrix_sep_con(M, H, lam, para)
 % - S: p x n
 % - count_outer
 % - isCirc: TRUE or FALSE. TRUE if H is circulant.
-% created on 7/18/2025, Xuemei Chen
-% updated on 8/5/2025
+% created on 7/18/2025, Xuemei
+% updated on 
 
 
 [u, s, v] = svd(H);
@@ -47,5 +47,4 @@ outputC = gen_matrix_sep(C*M, CH, lam, para);
 output.S = outputC.S;
 output.L = M - H*outputC.S;
 output.count_outer = outputC.count_outer;
-%output.isCirc = outputC.isCirc;
-output.para = outputC.para;
+output.isCirc = outputC.isCirc;
