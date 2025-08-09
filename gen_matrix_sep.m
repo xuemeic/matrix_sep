@@ -108,7 +108,7 @@ elseif strcmp(lasso_method, 'ADMM')
         elseif (para_lasso.decomp == "svd") && (~para.preconditioned)
             [para_lasso.V_A, para_lasso.S2_A] = pref(H);
         elseif para_lasso.decomp == "chol"
-            L_H = chol(H'*H + para.lasso_rho*eye(m), 'lower');
+            L_H = chol(H'*H + para.lasso_rho*eye(p), 'lower');
             para_lasso.L = L_H;
         end
 

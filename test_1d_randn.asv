@@ -39,17 +39,22 @@ para.preconditioned = false;
 lam =  1/sqrt(max(m,n));
 
 tic
-output = gen_matrix_sep_con(M0, H, lam, para);
+output = gen_matrix_sep(M0, H, lam, para);
 t = toc;
-desired_print(output, t, L0, S0);
+desired_ptibt(output);
 
-para.lasso_method = 'FISTA';
+
 tic
-output = gen_matrix_sep_con(M0, H, lam, para);
-t = toc;
-desired_print(output, t, L0, S0);
+outputC = gen_matrix_sep_con(M0, H, lam, para);
+toc
+rel_L_c = norm(outputC.L - L0, 'fro')/norm(L0, 'fro');
+rel_S_c = norm(outputC.S - S0, 'fro')/norm(S0, 'fro');
+fprintf("Relative error of recovering L0: %e\n", rel_L_c);
+fprintf("Relative error of recovering S0: %e\n", rel_S_c);
+fprintf("Ran %g many outer loops.\n", outputC.count_outer);
+fprintf("Input H was circulant? Answer: %g \n\n", outputC.isCirc)
 
-function desired_print(o, t, L0, S0)
+function desired_print(o)
 if o.para.preconditioned
     sp = "with preconditioning";
 else

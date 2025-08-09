@@ -46,23 +46,23 @@ Relative error of recovering S0: 2.190150e-08
 ### H is iid N(0, 1)
 n = 300;
 m = 270;
-p = 296;
+p = 266;
 
 run `test_1d_randn.m`. 
 
 Matlab output:
 ```
-Elapsed time is 50.797600 seconds.
-Relative error of recovering L0: 8.633890e-01
-Relative error of recovering S0: 3.132586e-03
-Ran 500 many outer loops.
-Input H was circulant? Answer: 0 
-****** with preconditioning ******
-Elapsed time is 6.419518 seconds.
-Relative error of recovering L0: 3.337300e-04
-Relative error of recovering S0: 8.266345e-07
-Ran 99 many outer loops.
-Input H was circulant? Answer: 0 
+******* with preconditioning, lasso by ADMM ******
+Number of iterations: 100.
+Duration: 5.235 seconds.
+Relative error of recovering L0: 3.270631e-04
+Relative error of recovering S0: 8.156555e-07
+
+******* with preconditioning, lasso by FISTA ******
+Number of iterations: 100.
+Duration: 2.543 seconds.
+Relative error of recovering L0: 1.924595e-04
+Relative error of recovering S0: 4.581211e-07
 ```
 
 ## 2D

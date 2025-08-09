@@ -93,7 +93,7 @@ if strcmp(method, 'ADMM')
         end
         if strcmp(decomp, 'chol') && (~isfield(para, 'L_A'))
             % if use chol and L_A not provided, evaluate
-            para.L_A = chol(A'*A + rho*eye(m), 'lower');
+            para.L_A = chol(A'*A + rho*eye(p), 'lower');
         end
         if strcmp(decomp, 'chol')
             % if use chol
