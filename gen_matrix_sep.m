@@ -73,7 +73,6 @@ lasso_decomp = para.lasso_decomp;
 para_lasso.max_iter = para.lasso_max_iter;
 para_lasso.rho = para.lasso_rho; % if method is ADMM
 para_lasso.tol = para.lasso_tol;
-para_lasso.prefactored = true; % always true in this function
 para_lasso.method = lasso_method;
 para_lasso.decomp = lasso_decomp; % default value
 

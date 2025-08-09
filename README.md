@@ -18,17 +18,29 @@ $$H=\begin{bmatrix}
 
 Matlab output:
 ```
-Elapsed time is 31.496404 seconds.
-Relative error of recovering L0: 1.500221e-03
-Relative error of recovering S0: 4.986135e-04
-Ran 500 many outer loops.
-Input H was circulant? Answer: 1 
-****** with preconditioning ******
-Elapsed time is 2.878626 seconds.
+******* no preconditioning, lasso by ADMM ******
+Number of iterations: 500.
+Duration: 27.400 seconds.
+Relative error of recovering L0: 1.153768e-02
+Relative error of recovering S0: 2.470040e-03
+
+******* with preconditioning, lasso by ADMM ******
+Number of iterations: 28.
+Duration: 2.762 seconds.
 Relative error of recovering L0: 2.379997e-05
 Relative error of recovering S0: 2.141106e-06
-Ran 28 many outer loops.
-Input H was circulant? Answer: 0 
+
+******* no preconditioning, lasso by FISTA ******
+Number of iterations: 95.
+Duration: 8.201 seconds.
+Relative error of recovering L0: 9.974481e-06
+Relative error of recovering S0: 1.577030e-06
+
+******* with preconditioning, lasso by FISTA ******
+Number of iterations: 28.
+Duration: 1.406 seconds.
+Relative error of recovering L0: 8.335690e-07
+Relative error of recovering S0: 2.190150e-08
 ```
 
 ### H is iid N(0, 1)
