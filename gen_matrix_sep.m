@@ -24,7 +24,7 @@ function output = gen_matrix_sep(M, H, lam, para)
 % - L: m x n
 % - S: p x n
 % - count_outer
-% - isCirc: TRUE or FALSE. TRUE if H is circulant.
+% - para: similar to input with possibly more fields
 % updated on 4/9/2025
 % updated on 4/21/2025
 % updated on 7/5/2025: precompute A^Tb outside of loop
@@ -39,6 +39,8 @@ max_iter_default = 200;
 tol_outer_default = 1e-7;
 lasso_method_default = 'FISTA';
 lasso_decomp_default = 'svd';
+lasso_rho_default = 1;
+lasso_tol_default = 1e-5;
 %% pass the parameters
 if ~isfield(para, 'preconditioned')
     error('Please specify "para.preconditioned" value.')
@@ -64,6 +66,10 @@ if ~ isfield(para, 'lasso_decomp')
     para.lasso_decomp = lasso_decomp_default; 
 end
 
+if ~isfield(para, 'lasso_tol')
+    para.lasso_tol = lasso_tol_default;
+end
+
 rho_outer = para.rho_outer;
 N_outer = para.max_iter;
 tol_outer = para.tol_outer;
@@ -71,7 +77,6 @@ lasso_method = para.lasso_method;
 lasso_decomp = para.lasso_decomp;
 %% parameters for my_lasso()
 para_lasso.max_iter = para.lasso_max_iter;
-para_lasso.rho = para.lasso_rho; % if method is ADMM
 para_lasso.tol = para.lasso_tol;
 para_lasso.method = lasso_method;
 para_lasso.decomp = lasso_decomp; % default value
@@ -91,6 +96,11 @@ if strcmp(lasso_method, 'FISTA')
     end
 elseif strcmp(lasso_method, 'ADMM')
     % ADMM
+    if ~isfield(para, 'lasso_rho')
+        % if para.lasso_rho not given
+        para.lasso_rho = lasso_rho_default;
+    end
+    para_lasso.rho = para.lasso_rho; 
     if is_circulant(H)
         isCirculant = true; 
         para_lasso.isCirculant = isCirculant; 
