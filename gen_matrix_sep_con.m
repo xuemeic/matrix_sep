@@ -17,7 +17,7 @@ function output = gen_matrix_sep_con(M, H, lam, para)
 % - L: m x n
 % - S: p x n
 % - count_outer
-% - isCirc: TRUE or FALSE. TRUE if H is circulant.
+% - para
 % created on 7/18/2025, Xuemei Chen
 % updated on 8/5/2025
 

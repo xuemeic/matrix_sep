@@ -2,20 +2,6 @@ load('data/video.mat'); % get V: 240 by 320 by 300
 V = uint8(V); % values are integers from 0 to 255
 V = im2double(V); % ranges from 0 to 1
 
-[h, w, numFrames] = size(V);
-
-
-% Calculate center crop indices
-half_crop = 24;  
-center_row = floor(h/2);
-center_col = floor(w/2);
-
-row_range = (center_row - half_crop + 1):(center_row + half_crop);
-col_range = (center_col - half_crop + 1):(center_col + half_crop);
-
-% Initialize cropped video array
-V_cropped = V(row_range, col_range, :);
-
 [m1, m2, K] = size(V);
 
 n1 = 2;
@@ -44,37 +30,93 @@ M0 = pagemtimes(pagemtimes(G1, V), G2');
 M = - M0 + pagemtimes(pagemtimes(G1, ones(size(M0))), G2');
 
 
-para.rho_outer = 1;
-para.rho_inner = 1;
+clear para
+para.rho_outer = 1; 
+para.rho_inner = 1; 
+para.max_iter = 100;
+para.lasso_max_iter = 10;
+% FISTA time
 % 48 seconds for 10, 3
+% 178 seconds for 20, 3
+% 445 seconds for 50, 3: fig 2 looks good
+% 225 seconds for 50, 5: fig 3 looks the same
+% 400 seconds for 80, 5: fig 4 small improvement from fig 3
+% 661 seconds for 100, 10: fig 5 is the same as fig 4
+
+% new ADMM time
+% 1664 seconds for 80, 5: something is seriously wrong as the result is bad
+
+% old ADMM time
 % 108s for 10, 10
 % 557s for 50, 10
 % 1188s = 20m for 100, 10
-para.N_outer = 100;
-para.N_inner = 10;
-para.tol_outer = 1e-8;
-para.tol_inner = 1e-6;
+para.tol_outer = 1e-7;
+para.lasso_tol = 1e-5;
+%para.is_E = true;
+para.E1 = E1;
+para.E2 = E2;
+para.lasso_method = 'ADMM';
+para.preconditioned = false;
 para.is_E = false;
-lam =  1/sqrt(min(m1*m2, K))*0.2;
+lam =  1/sqrt(max(m1*m2, K));
+%lam =  1/sqrt(min(m1*m2, K))*0.2;
+
 
 tic
-outputC = gen_matrix_sep_2d_con(M, G1, G2, lam, para);
-toc
+outputa = gen_matrix_sep_2d_con(M, G1, G2, lam, para);
+t = toc;
+
+desired_print(outputa, t)
+
+
+para.lasso_method = 'FISTA';
+tic
+outputf = gen_matrix_sep_2d_con(M, G1, G2, lam, para);
+t2 = toc;
+
+desired_print(outputf, t2)
+
 
 %%
 figure(1)
 k = 10;
-subplot(1, 4, 1)
+gm = 3;
+gn = 2;
+subplot(gm, gn, 1)
 imshow(V(:,:, k))
-title('original')
-subplot(1, 4, 2)
+title('original (unknown)')
+subplot(gm, gn, 2)
 imshow(M0(:,:, k))
-title('Blurred')
-subplot(1, 4, 3)
-imshow(1-outputC.S(:,:, k), [])
-title('deblurred sparse component')
-subplot(1, 4, 4)
-imshow(-outputC.L(:,:, k), [])
-title('background')
+title('Blurred: given M0')
+
+subplot(gm, gn, 3)
+imshow(1-outputa.S(:,:, k), [])
+title('deblurred sparse component: lasso by admm')
+subplot(gm, gn, 4)
+imshow(-outputa.L(:,:, k), [])
+title('background: lasso by admm')
+
+subplot(gm, gn, 5)
+imshow(1-outputf.S(:,:, k), [])
+title('deblurred sparse component: lasso by fista')
+subplot(gm, gn, 6)
+imshow(-outputf.L(:,:, k), [])
+title('background: lasso by fista')
+
+
 %%
-%save('results/full_vid.mat', "outputC", "V", "M0", "L_output")
+print("-f1", 'figs/frame10_full', '-djpeg', '-r300')
+
+function desired_print(o, t)
+if o.para.preconditioned
+    sp = "with preconditioning";
+else
+    sp = "no preconditioning";
+end
+fprintf("******* %s, lasso by %s ******\n", sp, o.para.lasso_method)
+fprintf("Number of iterations: %g.\n", o.count_outer);
+fprintf("Duration: %.3f seconds.\n", t)
+
+
+end
+

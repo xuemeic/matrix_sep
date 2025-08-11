@@ -77,17 +77,17 @@ run `test_2d_randn.m`
 
 Matlab output:
 ```
-Elapsed time is 0.738772 seconds.
-Relative error of recovering L0: 3.156142e-01
-Relative error of recovering S0: 1.530180e-03
-Ran 200 many outer loops.
-Input H was circulant? Answer: 0 
-****** with preconditioning ******
-Elapsed time is 0.101072 seconds.
-Relative error of recovering L0: 1.065884e-05
-Relative error of recovering S0: 7.374641e-08
-Ran 54 many outer loops.
-Input H was circulant? Answer: 0 
+******* Gi Gaussian, with preconditioning, lasso by ADMM ******
+Number of iterations: 54.
+Duration: 0.097 seconds.
+Relative error of recovering L0: 1.874403e-05
+Relative error of recovering S0: 1.323147e-07
+
+******* Gi Gaussian, with preconditioning, lasso by FISTA ******
+Number of iterations: 54.
+Duration: 0.050 seconds.
+Relative error of recovering L0: 2.270315e-06
+Relative error of recovering S0: 1.943040e-08
 ```
 ### Gi are circulant
 run `test_2d_circ.m`
@@ -100,17 +100,16 @@ K = 50;
 
 Matlab output
 ```
-Elapsed time is 3.257809 seconds.
-Relative error of recovering L0: 2.674311e-01
-Relative error of recovering S0: 5.264092e-04
-Ran 200 many outer loops.
-Input H was circulant? Answer: 1 
-****** with preconditioning ******
-Elapsed time is 0.239408 seconds.
-Relative error of recovering L0: 8.045549e-06
-Relative error of recovering S0: 2.419491e-08
-Ran 41 many outer loops.
-Input H was circulant? Answer: 0 
+******* Gi circulant, with preconditioning, lasso by ADMM ******
+Number of iterations: 28.
+Duration: 0.171 seconds.
+Relative error of recovering L0: 1.594163e-05
+Relative error of recovering S0: 4.504595e-08
+
+******* Gi circulant, with preconditioning, lasso by FISTA ******
+Number of iterations: 28.
+Duration: 0.060 seconds.
+Relative error of recovering L0: 7.656994e-07
 ```
 
 ### Gi block structured
@@ -126,17 +125,17 @@ Gi = kron(eye(mi/ni), Ei); Each Ei is NOT circulant.
 
 Matlab output
 ```
-Elapsed time is 4.842610 seconds.
-Relative error of recovering L0: 1.615380e+01
-Relative error of recovering S0: 8.527813e-01
-Ran 104 many outer loops.
-Input H was circulant? Answer: 0 
-****** with preconditioning ******
-Elapsed time is 0.827753 seconds.
-Relative error of recovering L0: 6.747744e-07
-Relative error of recovering S0: 1.704130e-08
-Ran 38 many outer loops.
-Input H was circulant? Answer: 0 
+******* Gi block structured, with preconditioning, lasso by ADMM ******
+Number of iterations: 28.
+Duration: 0.608 seconds.
+Relative error of recovering L0: 1.440568e-06
+Relative error of recovering S0: 3.490566e-08
+
+******* Gi block structured, with preconditioning, lasso by FISTA ******
+Number of iterations: 28.
+Duration: 0.233 seconds.
+Relative error of recovering L0: 5.662892e-08
+Relative error of recovering S0: 1.402201e-09
 ```
 
 ### Gi block circulant
@@ -146,17 +145,29 @@ Gi = kron(eye(mi/ni), Ei); Each Ei is circulant.
 
 Matlab output
 ```
-Elapsed time is 6.414501 seconds.
-Relative error of recovering L0: 3.199401e+01
-Relative error of recovering S0: 9.344267e-01
-Ran 153 many outer loops.
-Input H was circulant? Answer: 0 
-****** with preconditioning ******
-Elapsed time is 0.907090 seconds.
-Relative error of recovering L0: 6.122999e-07
-Relative error of recovering S0: 1.717772e-08
-Ran 34 many outer loops.
-Input H was circulant? Answer: 0 
+******* Gi block circ, no preconditioning, lasso by ADMM ******
+Number of iterations: 200.
+Duration: 4.043 seconds.
+Relative error of recovering L0: 3.547646e+00
+Relative error of recovering S0: 5.303301e-01
+
+******* Gi block circ, with preconditioning, lasso by ADMM ******
+Number of iterations: 25.
+Duration: 0.557 seconds.
+Relative error of recovering L0: 1.281153e-06
+Relative error of recovering S0: 3.440614e-08
+
+******* Gi block circ, no preconditioning, lasso by FISTA ******
+Number of iterations: 200.
+Duration: 3.902 seconds.
+Relative error of recovering L0: 4.189241e-02
+Relative error of recovering S0: 1.085966e-02
+
+******* Gi block circ, with preconditioning, lasso by FISTA ******
+Number of iterations: 25.
+Duration: 0.343 seconds.
+Relative error of recovering L0: 6.864156e-08
+Relative error of recovering S0: 2.055706e-09
 ```
 
 ### Gi block circulant, 
@@ -166,17 +177,29 @@ Gi = kron(eye(mi/ni), Ei); Each Ei is circulant and mi/ni is small.
 
 Matlab output
 ```
-Elapsed time is 0.277345 seconds.
-Relative error of recovering L0: 1.757333e+01
-Relative error of recovering S0: 1.000000e+00
-Ran 7 many outer loops.
-Input H was circulant? Answer: 1 
-****** with preconditioning ******
-Elapsed time is 0.741093 seconds.
-Relative error of recovering L0: 3.923171e-07
-Relative error of recovering S0: 1.709341e-08
-Ran 36 many outer loops.
-Input H was circulant? Answer: 0
+******* Gi block circ, no preconditioning, lasso by ADMM ******
+Number of iterations: 56.
+Duration: 2.855 seconds.
+Relative error of recovering L0: 1.742138e+01
+Relative error of recovering S0: 9.963165e-01
+
+******* Gi block circ, with preconditioning, lasso by ADMM ******
+Number of iterations: 28.
+Duration: 0.695 seconds.
+Relative error of recovering L0: 8.780395e-07
+Relative error of recovering S0: 3.455678e-08
+
+******* Gi block circ, no preconditioning, lasso by FISTA ******
+Number of iterations: 61.
+Duration: 1.030 seconds.
+Relative error of recovering L0: 1.721960e+01
+Relative error of recovering S0: 9.900553e-01
+
+******* Gi block circ, with preconditioning, lasso by FISTA ******
+Number of iterations: 28.
+Duration: 0.259 seconds.
+Relative error of recovering L0: 1.852779e-08
+Relative error of recovering S0: 1.846655e-09
 ```
 
 ### video background removal and deconvolution simultaneously
@@ -184,14 +207,27 @@ run `test_2d_vid`
 
 Matlab output
 ```
-Elapsed time is 31.758500 seconds.
+******* with preconditioning, lasso by ADMM ******
+Number of iterations: 100.
+Duration: 26.717 seconds.
+******* with preconditioning, lasso by FISTA ******
+Number of iterations: 100.
+Duration: 10.128 seconds.
 ```
+
+The recovered results are similar, whether by ADMM or FISTA.
+
 ![results](figs/frame10.jpg)
 
 run `test_2d_vid_full`
 
 Matlab output
 ```
-Elapsed time is 1081.218442 seconds.
+****** with preconditioning, lasso by ADMM ******
+Number of iterations: 100.
+Duration: 704.386 seconds.
+******* with preconditioning, lasso by FISTA ******
+Number of iterations: 100.
+Duration: 265.895 seconds.
 ```
 ![full](figs/frame10_full.jpg)

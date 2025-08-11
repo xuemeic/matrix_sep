@@ -86,7 +86,7 @@ para_lasso.decomp = lasso_decomp; % default value
 if strcmp(lasso_method, 'FISTA')
     % FISTA
     % H circulant does not matter
-    %isCirculant = [];
+    isCirculant = [];
     if para.preconditioned
         para_lasso.L = 1; % this is biggest singular value of H'H
     else
@@ -103,13 +103,13 @@ elseif strcmp(lasso_method, 'ADMM')
     para_lasso.rho = para.lasso_rho; 
     if is_circulant(H)
         isCirculant = true; 
-        para_lasso.isCirculant = isCirculant; 
+        %para_lasso.isCirculant = isCirculant; 
         d = abs(fft(H(:,1)));
         para_lasso.coef = d.^2;
     else
         % more common case for ADMM
         isCirculant = false;
-        para_lasso.isCirculant = isCirculant;
+        %para_lasso.isCirculant = isCirculant;
         if (para_lasso.decomp == "svd") && para.preconditioned
             % singular values of H'H
             para_lasso.S2_A = para.S2_H; % p by 1
@@ -125,7 +125,8 @@ elseif strcmp(lasso_method, 'ADMM')
             
     end
 end
-
+para_lasso.isCirculant = isCirculant;
+para.isCirculant = isCirculant;
 
 %% initialization and main loop
 L = zeros(m, n);
@@ -160,50 +161,8 @@ output.count_outer = count_outer;
 output.para = para;
 end
 
-%% helper functions
-function flag = is_circulant(A)
-    [m, n] = size(A);
-    
-    % we need A to be square if circulant
-    if m ~= n
-        flag = false;
-        return;
-    end
 
-    first_row = A(1, :);
-    
-    % check if each row is a shift of the first row
-    for i = 2:m
-        expected_row = circshift(first_row, [0, i-1]);
-        if any(A(i, :) ~= expected_row)
-            flag = false;
-            return;
-        end
-    end
-    flag = true;
-end
 
-function [V, sig] = pref(A)
-% prefactorization of A
-% A is m by p
-% [~, sig, V] = svd(A'*A)
-% V is square p by p
-% sig is p by 1
-% this won't be used if H is preconditioned
-
-[m, p] = size(A);
-
-if p < m % tall
-   [~, sig, V] = svd(A'*A); % V is p by p       
-   sig = diag(sig); % p by 1
-            
-else % fat, m smaller
-   [~, s, V] = svd(A); % V is p by p 
-   s = diag(s); % m by 1
-   sig = zeros(p, 1);
-   sig(1:length(s)) = (abs(s)).^2;
-end
-end
 
 
 

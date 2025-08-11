@@ -1,5 +1,8 @@
 % Gi = kron(eye(mi/ni), Ei);
 % E1, E2 will be circulant
+% but should set is_E to be false since n1, n2 are small
+%%% when Ei are circulant, and NOT preconditioned
+%%% we should set is_E to be false unless n1 and n2 are big.
 
 m1 = 20;
 m2 = 30;
@@ -46,45 +49,54 @@ L0 = reshape(L0, [m1, m2, K]);
 M0 = L0 + pagemtimes(pagemtimes(G1, S0), G2');
 
 % run
-para.rho_outer = 1; % smaller rho results fewer iterations
-para.rho_inner = 1; % 10 runs longer
-para.N_outer = 200;
-para.N_inner = 50;
+para.rho_outer = 1; 
+para.rho_inner = 1; 
+para.max_iter = 200;
+para.lasso_max_iter = 20;
 para.tol_outer = 1e-8;
-para.tol_inner = 1e-6;
-
-%%% setting is_E to be false forces SVD
-para.is_E = false;
-%%% setting is_E to be true activates block circulant, but takes longer
-%%% time
-%%% we should set is_E to be false unless n1 and n2 are big.
+para.lasso_tol = 1e-6;
 para.E1 = E1;
 para.E2 = E2;
-lam =  1/sqrt(min(m1*m2, K));
+para.lasso_method = 'ADMM';
+para.preconditioned = false;
+lam =  1/sqrt(max(m1*m2, K));
 
+para.is_E = false;
 tic
 output = gen_matrix_sep_2d(M0, G1, G2, lam, para);
-toc
+t = toc;
+desired_print(output, t, L0, S0);
 
-rel_L = norm(output.L - L0, 'fro')/norm(L0, 'fro');
-rel_S = norm(output.S - S0, 'fro')/norm(S0, 'fro');
-fprintf("Relative error of recovering L0: %e\n", rel_L);
-fprintf("Relative error of recovering S0: %e\n", rel_S);
-fprintf("Ran %g many outer loops.\n", output.count_outer);
-fprintf("Input H was circulant? Answer: %g \n", output.isCirc)
+para.is_E = true;
+tic
+output = gen_matrix_sep_2d_con(M0, G1, G2, lam, para);
+t = toc;
+desired_print(output, t, L0, S0);
 
+para.lasso_method = 'FISTA';
+tic
+outputC = gen_matrix_sep_2d(M0, G1, G2, lam, para);
+t = toc;
+desired_print(outputC, t, L0, S0);
 
-
-fprintf("****** with preconditioning ******\n")
 tic
 outputC = gen_matrix_sep_2d_con(M0, G1, G2, lam, para);
-toc
-
-rel_Lc = norm(outputC.L - L0, 'fro')/norm(L0, 'fro');
-rel_Sc = norm(outputC.S - S0, 'fro')/norm(S0, 'fro');
-fprintf("Relative error of recovering L0: %e\n", rel_Lc);
-fprintf("Relative error of recovering S0: %e\n", rel_Sc);
-fprintf("Ran %g many outer loops.\n", outputC.count_outer);
-fprintf("Input H was circulant? Answer: %g \n\n", outputC.isCirc)
+t = toc;
+desired_print(outputC, t, L0, S0);
 
 
+
+function desired_print(o, t, L0, S0)
+if o.para.preconditioned
+    sp = "with preconditioning";
+else
+    sp = "no preconditioning";
+end
+fprintf("******* Gi block circ, %s, lasso by %s ******\n", sp, o.para.lasso_method)
+fprintf("Number of iterations: %g.\n", o.count_outer);
+fprintf("Duration: %.3f seconds.\n", t)
+rel_L = norm(o.L - L0, 'fro')/norm(L0, 'fro');
+rel_S = norm(o.S - S0, 'fro')/norm(S0, 'fro');
+fprintf("Relative error of recovering L0: %e\n", rel_L);
+fprintf("Relative error of recovering S0: %e\n\n", rel_S);
+end

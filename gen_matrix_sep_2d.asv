@@ -136,7 +136,8 @@ elseif strcmp(lasso_method, 'ADMM')
             E2 = para.E2;
             para_lasso.E1 = E1;
             para_lasso.E2 = E2;
-            
+            [n1, ~] = size(E1);
+            [n2, ~] = size(E2);
         end
 
     elseif para.is_E

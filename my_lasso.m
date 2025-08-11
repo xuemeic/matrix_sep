@@ -29,7 +29,7 @@ function [x, num_iter] = my_lasso(A, b, lam, para)
 
 % written by Xuemei Chen 8/4/2025
 
-[m, p] = size(A);
+[~, p] = size(A);
 [~, k] = size(b);
 %% pass parameter
 % default
@@ -174,8 +174,7 @@ switch method
         t = 1;
         y = x;
         for j = 1:max_iter
-            xlast = x;
-            
+            xlast = x;            
             x = SoftThresh(y - (1/L)*A'*(A*y - b), lam/L);
             t = (1+sqrt(1+4*t^2))/2;
             y = x + (t-1)/t*(x - xlast);

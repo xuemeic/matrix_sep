@@ -30,39 +30,45 @@ L0 = reshape(L0, [m1, m2, K]);
 M0 = L0 + pagemtimes(pagemtimes(G1, S0), G2');
 
 % run
-para.rho_outer = 1; % smaller rho results fewer iterations
-para.rho_inner = 1; % 10 runs longer
-para.N_outer = 200;
-para.N_inner = 50;
+clear para
+para.rho_outer = 1; 
+para.rho_inner = 1; 
+para.max_iter = 200;
+para.lasso_max_iter = 50;
 para.tol_outer = 1e-8;
-para.tol_inner = 1e-6;
+para.lasso_tol = 1e-6;
 para.is_E = false;
-lam =  1/sqrt(min(m1*m2, K));
+para.lasso_method = 'ADMM';
+para.preconditioned = false;
+lam =  1/sqrt(max(m1*m2, K));
 
 
 tic
-output = gen_matrix_sep_2d(M0, G1, G2, lam, para);
-toc
+output = gen_matrix_sep_2d_con(M0, G1, G2, lam, para);
+t = toc;
 
-rel_L = norm(output.L - L0, 'fro')/norm(L0, 'fro');
-rel_S = norm(output.S - S0, 'fro')/norm(S0, 'fro');
-fprintf("Relative error of recovering L0: %e\n", rel_L);
-fprintf("Relative error of recovering S0: %e\n", rel_S);
-fprintf("Ran %g many outer loops.\n", output.count_outer);
-fprintf("Input H was circulant? Answer: %g \n", output.isCirc)
-
-fprintf("****** with preconditioning ******\n")
+desired_print(output, t, L0, S0);
 
 
+
+
+para.lasso_method = 'FISTA';
 tic
 outputC = gen_matrix_sep_2d_con(M0, G1, G2, lam, para);
-toc
+t2 = toc;
+desired_print(outputC, t2, L0, S0);
 
-rel_Lc = norm(outputC.L - L0, 'fro')/norm(L0, 'fro');
-rel_Sc = norm(outputC.S - S0, 'fro')/norm(S0, 'fro');
-fprintf("Relative error of recovering L0: %e\n", rel_Lc);
-fprintf("Relative error of recovering S0: %e\n", rel_Sc);
-fprintf("Ran %g many outer loops.\n", outputC.count_outer);
-fprintf("Input H was circulant? Answer: %g \n\n", outputC.isCirc)
-
-
+function desired_print(o, t, L0, S0)
+if o.para.preconditioned
+    sp = "with preconditioning";
+else
+    sp = "no preconditioning";
+end
+fprintf("******* Gi Gaussian, %s, lasso by %s ******\n", sp, o.para.lasso_method)
+fprintf("Number of iterations: %g.\n", o.count_outer);
+fprintf("Duration: %.3f seconds.\n", t)
+rel_L = norm(o.L - L0, 'fro')/norm(L0, 'fro');
+rel_S = norm(o.S - S0, 'fro')/norm(S0, 'fro');
+fprintf("Relative error of recovering L0: %e\n", rel_L);
+fprintf("Relative error of recovering S0: %e\n\n", rel_S);
+end

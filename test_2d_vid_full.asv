@@ -1,27 +1,8 @@
-% test on a cropped video where each frame is 48 by 48
-% E1 is circulant but 2 by 2
-% E2 is circulant but 3 by 3
-
-
 load('data/video.mat'); % get V: 240 by 320 by 300
 V = uint8(V); % values are integers from 0 to 255
 V = im2double(V); % ranges from 0 to 1
 
-[h, w, numFrames] = size(V);
-
-
-% Calculate center crop indices
-half_crop = 24;  
-center_row = floor(h/2);
-center_col = floor(w/2);
-
-row_range = (center_row - half_crop + 1):(center_row + half_crop);
-col_range = (center_col - half_crop + 1):(center_col + half_crop);
-
-% Initialize cropped video array
-V_cropped = V(row_range, col_range, :);
-
-[m1, m2, K] = size(V_cropped); % 48 x 48 x 300
+[m1, m2, K] = size(V);
 
 n1 = 2;
 rng(3);
@@ -31,7 +12,7 @@ E1r1 = E1r1/sum(E1r1); % First row of the circulant matrix
 E1 = toeplitz([E1r1(1), fliplr(E1r1(2:end))], E1r1); 
 % E1 will have row sum to be 1
 
-n2 = 3;
+n2 = 4;
 E2r1 = rand(1, n2); 
 E2r1 = E2r1/sum(E2r1); % First row of the circulant matrix 
 E2 = toeplitz([E2r1(1), fliplr(E2r1(2:end))], E2r1); 
@@ -41,29 +22,45 @@ E2 = E2';
 G1 = kron(eye(m1/n1), E1);
 G2 = kron(eye(m2/n2), E2);
 
-% preconditioning is applied
 
 
-M0 = pagemtimes(pagemtimes(G1, V_cropped), G2');
+M0 = pagemtimes(pagemtimes(G1, V), G2');
 % M0 is very blurred
 
-M = -M0 + pagemtimes(pagemtimes(G1, ones(size(M0))), G2');
-%CM = pagemtimes(pagemtimes(C1, M), C2');
+M = - M0 + pagemtimes(pagemtimes(G1, ones(size(M0))), G2');
+
 
 clear para
 para.rho_outer = 1; 
 para.rho_inner = 1; 
-para.max_iter = 50;
-para.lasso_max_iter = 20;
+para.max_iter = 100;
+para.lasso_max_iter = 10;
+% FISTA time
+% 48 seconds for 10, 3
+% 178 seconds for 20, 3
+% 445 seconds for 50, 3: fig 2 looks good
+% 225 seconds for 50, 5: fig 3 looks the same
+% 400 seconds for 80, 5: fig 4 small improvement from fig 3
+% 661 seconds for 100, 10: fig 5 is the same as fig 4
+
+% new ADMM time
+% 1664 seconds for 80, 5: something is seriously wrong as the result is bad
+
+% old ADMM time
+% 108s for 10, 10
+% 557s for 50, 10
+% 1188s = 20m for 100, 10
 para.tol_outer = 1e-7;
 para.lasso_tol = 1e-5;
-para.is_E = true; % 
+%para.is_E = true;
 para.E1 = E1;
 para.E2 = E2;
 para.lasso_method = 'ADMM';
 para.preconditioned = false;
-para.is_E = false; %%%%%%%%%%% currently false works
+para.is_E = false;
 lam =  1/sqrt(max(m1*m2, K));
+%lam =  1/sqrt(min(m1*m2, K))*0.2;
+
 
 tic
 outputa = gen_matrix_sep_2d_con(M, G1, G2, lam, para);
@@ -71,20 +68,22 @@ t = toc;
 
 desired_print(outputa, t)
 
-%{
+
 para.lasso_method = 'FISTA';
 tic
 outputf = gen_matrix_sep_2d_con(M, G1, G2, lam, para);
 t2 = toc;
 
 desired_print(outputf, t2)
-%}
+
 
 %%
 figure(1)
 k = 10;
-subplot(1, 4, 1)
-imshow(V_cropped(:,:, k))
+gm = 3;
+gn = 2;
+subplot(, 2, 1)
+imshow(V(:,:, k))
 title('original (unknown)')
 subplot(1, 4, 2)
 imshow(M0(:,:, k))
@@ -111,3 +110,4 @@ fprintf("Duration: %.3f seconds.\n", t)
 
 
 end
+
