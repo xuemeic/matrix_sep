@@ -71,14 +71,14 @@ t = toc;
 
 desired_print(outputa, t)
 
-%{
+
 para.lasso_method = 'FISTA';
 tic
 outputf = gen_matrix_sep_2d_con(M, G1, G2, lam, para);
 t2 = toc;
 
 desired_print(outputf, t2)
-%}
+
 
 %%
 figure(1)

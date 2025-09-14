@@ -197,13 +197,13 @@ switch method
         
         for j = 1:max_iter
             Xlast = X;
-            
+            tlast = t;
             Ay = bilinear_framewise(Y, G1, G2');
             
             temp = bilinear_framewise(Ay - B, G1', G2);
             X = SoftThresh(Y - (1/L)*temp, lam/L);
             t = (1+sqrt(1+4*t^2))/2;
-            Y = X + (t-1)/t*(X - Xlast);
+            Y = X + (tlast-1)/t*(X - Xlast);
             X_change = norm(X - Xlast, 'fro')/(norm(Xlast, 'fro') + 1);
             if X_change < tol   
                 break

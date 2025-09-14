@@ -39,11 +39,21 @@ para.preconditioned = false;
 lam =  1/sqrt(max(m,n));
 
 tic
+output = gen_matrix_sep(M0, H, lam, para);
+t = toc;
+desired_print(output, t, L0, S0);
+
+tic
 output = gen_matrix_sep_con(M0, H, lam, para);
 t = toc;
 desired_print(output, t, L0, S0);
 
 para.lasso_method = 'FISTA';
+tic
+output = gen_matrix_sep(M0, H, lam, para);
+t = toc;
+desired_print(output, t, L0, S0);
+
 tic
 output = gen_matrix_sep_con(M0, H, lam, para);
 t = toc;

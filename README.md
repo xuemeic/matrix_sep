@@ -20,27 +20,27 @@ Matlab output:
 ```
 ******* no preconditioning, lasso by ADMM ******
 Number of iterations: 500.
-Duration: 27.400 seconds.
+Duration: 28.733 seconds.
 Relative error of recovering L0: 1.153768e-02
 Relative error of recovering S0: 2.470040e-03
 
 ******* with preconditioning, lasso by ADMM ******
 Number of iterations: 28.
-Duration: 2.762 seconds.
+Duration: 2.103 seconds.
 Relative error of recovering L0: 2.379997e-05
 Relative error of recovering S0: 2.141106e-06
 
 ******* no preconditioning, lasso by FISTA ******
-Number of iterations: 95.
-Duration: 8.201 seconds.
-Relative error of recovering L0: 9.974481e-06
-Relative error of recovering S0: 1.577030e-06
+Number of iterations: 112.
+Duration: 9.504 seconds.
+Relative error of recovering L0: 3.850090e-06
+Relative error of recovering S0: 2.840306e-07
 
 ******* with preconditioning, lasso by FISTA ******
 Number of iterations: 28.
-Duration: 1.406 seconds.
-Relative error of recovering L0: 8.335690e-07
-Relative error of recovering S0: 2.190150e-08
+Duration: 1.606 seconds.
+Relative error of recovering L0: 8.337728e-07
+Relative error of recovering S0: 2.190805e-08
 ```
 
 ### H is iid N(0, 1)
@@ -52,15 +52,27 @@ run `test_1d_randn.m`.
 
 Matlab output:
 ```
+******* no preconditioning, lasso by ADMM ******
+Number of iterations: 500.
+Duration: 34.807 seconds.
+Relative error of recovering L0: 8.845180e-01
+Relative error of recovering S0: 3.399294e-03
+
 ******* with preconditioning, lasso by ADMM ******
 Number of iterations: 100.
-Duration: 5.235 seconds.
+Duration: 10.627 seconds.
 Relative error of recovering L0: 3.270631e-04
 Relative error of recovering S0: 8.156555e-07
 
+******* no preconditioning, lasso by FISTA ******
+Number of iterations: 500.
+Duration: 44.451 seconds.
+Relative error of recovering L0: 7.891691e+16
+Relative error of recovering S0: 3.929548e+14
+
 ******* with preconditioning, lasso by FISTA ******
 Number of iterations: 100.
-Duration: 2.543 seconds.
+Duration: 2.532 seconds.
 Relative error of recovering L0: 1.924595e-04
 Relative error of recovering S0: 4.581211e-07
 ```

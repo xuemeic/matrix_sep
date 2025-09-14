@@ -9,7 +9,6 @@ first_row = [-1 1 zeros(1, m - 2)]; % First row of the circulant matrix H
 H = toeplitz([first_row(1), fliplr(first_row(2:end))], first_row); 
 
 rng(2);
-%H = randn(m, p);
 
 % Make S0
 s = 15;
@@ -38,7 +37,7 @@ para.lasso_tol = 1e-5;
 para.lasso_method = 'ADMM';
 para.lasso_decomp = "svd"; 
 para.preconditioned = false;
-lam =  1/sqrt(m);
+lam =  1/sqrt(n);
 
 tic
 output = gen_matrix_sep(M0, H, lam, para);

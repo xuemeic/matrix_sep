@@ -76,27 +76,40 @@ t2 = toc;
 
 desired_print(outputf, t2)
 
-
+%%
+figure(2)
+k = 10;
+imshow(1-outputa.S(:,:, k), [])
+print("-f2", 'figs/frame10_admm_', '-djpeg', '-r300')
 %%
 figure(1)
 k = 10;
 gm = 3;
 gn = 2;
-subplot(, 2, 1)
+subplot(gm, gn, 1)
 imshow(V(:,:, k))
 title('original (unknown)')
-subplot(1, 4, 2)
+subplot(gm, gn, 2)
 imshow(M0(:,:, k))
 title('Blurred: given M0')
-subplot(1, 4, 3)
+
+subplot(gm, gn, 3)
 imshow(1-outputa.S(:,:, k), [])
-title('deblurred sparse component')
-subplot(1, 4, 4)
+title('deblurred sparse component: lasso by admm')
+subplot(gm, gn, 4)
 imshow(-outputa.L(:,:, k), [])
-title('background')
+title('background: lasso by admm')
+
+subplot(gm, gn, 5)
+imshow(1-outputf.S(:,:, k), [])
+title('deblurred sparse component: lasso by fista')
+subplot(gm, gn, 6)
+imshow(-outputf.L(:,:, k), [])
+title('background: lasso by fista')
+
 
 %%
-%print("-f1", 'figs/frame10', '-djpeg', '-r300')
+%print("-f1", 'figs/frame10_full', '-djpeg', '-r300')
 
 function desired_print(o, t)
 if o.para.preconditioned

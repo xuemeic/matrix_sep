@@ -35,16 +35,6 @@ para.rho_outer = 1;
 para.rho_inner = 1; 
 para.max_iter = 100;
 para.lasso_max_iter = 10;
-% FISTA time
-% 48 seconds for 10, 3
-% 178 seconds for 20, 3
-% 445 seconds for 50, 3: fig 2 looks good
-% 225 seconds for 50, 5: fig 3 looks the same
-% 400 seconds for 80, 5: fig 4 small improvement from fig 3
-% 661 seconds for 100, 10: fig 5 is the same as fig 4
-
-% new ADMM time
-% 1664 seconds for 80, 5: something is seriously wrong as the result is bad
 
 % old ADMM time
 % 108s for 10, 10
@@ -76,8 +66,25 @@ t2 = toc;
 
 desired_print(outputf, t2)
 
-
 %%
+figure(2)
+k = 10;
+imshow(1-outputa.S(:,:, k), [])
+print("-f2", 'figs/frame10_admm_sparse', '-djpeg', '-r300')
+
+figure(3)
+imshow(1-outputf.S(:,:, k), [])
+print("-f3", 'figs/frame10_fista_sparse', '-djpeg', '-r300')
+
+figure(4)
+imshow(1-outputa.L(:,:, k), [])
+print("-f4", 'figs/frame10_admm_background', '-djpeg', '-r300')
+
+figure(5)
+imshow(1-outputf.L(:,:, k), [])
+print("-f5", 'figs/frame10_fista_background', '-djpeg', '-r300')
+%%
+%{
 figure(1)
 k = 10;
 gm = 3;
@@ -102,10 +109,10 @@ title('deblurred sparse component: lasso by fista')
 subplot(gm, gn, 6)
 imshow(-outputf.L(:,:, k), [])
 title('background: lasso by fista')
-
+%}
 
 %%
-print("-f1", 'figs/frame10_full', '-djpeg', '-r300')
+%print("-f1", 'figs/frame10_full', '-djpeg', '-r300')
 
 function desired_print(o, t)
 if o.para.preconditioned
