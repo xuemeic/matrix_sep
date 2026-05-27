@@ -1,5 +1,6 @@
 % based on test_1d_avg
-% this is to test who rho's to pick
+% this is to test which rho's to pick
+% updated on 5/27/2026
 
 n = 100;
 m = n - 1;
@@ -37,7 +38,10 @@ para.N_inner = 20;
 para.tol_outer = 1e-7;
 para.tol_inner = 1e-5;
 para.decomp = "svd"; 
-lam =  1/sqrt(m);
+para.preconditioned = false;
+para.lasso_max_iter = 20;
+para.max_iter = 100;
+lam =  1/sqrt(n);
 
 
 
