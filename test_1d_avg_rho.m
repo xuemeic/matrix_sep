@@ -41,6 +41,7 @@ para.decomp = "svd";
 para.preconditioned = false;
 para.lasso_max_iter = 20;
 para.max_iter = 100;
+para.lasso_method = 'ADMM';
 lam =  1/sqrt(n);
 
 
@@ -53,7 +54,7 @@ record = zeros(ol, il, 3);
 for i = 1:ol
     for j = 1:il
         para.rho_outer = rho_outer_list(i); 
-        para.rho_inner = rho_inner_list(j); 
+        para.lasso_rho = rho_inner_list(j); 
         tic
         output = gen_matrix_sep(M0, H, lam, para);
         tim = toc;
@@ -69,7 +70,7 @@ record_c = zeros(ol, il, 3);
 for i = 1:ol
     for j = 1:il
         para.rho_outer = rho_outer_list(i); 
-        para.rho_inner = rho_inner_list(j); 
+        para.lasso_rho = rho_inner_list(j); 
         tic
         output = gen_matrix_sep_con(M0, H, lam, para);
         tim = toc;
@@ -95,7 +96,7 @@ xl = xlabel('$\rho_I$', 'interpreter', 'latex');
 yl = ylabel('$\rho_O$', 'interpreter', 'latex');
 xl.FontSize = 15;
 yl.FontSize = 15;
-t1=title("Relative Error of Recovering $S_0, L_0$: no preconditioning", "Interpreter","latex");
+t1=title("Relative Error of Recovering $S_0, L_0$: no precprocessing", "Interpreter","latex");
 t1.FontSize = 16;
 
 subplot(1,2,2)
@@ -111,11 +112,11 @@ xl = xlabel('$\rho_I$', 'interpreter', 'latex');
 yl = ylabel('$\rho_O$', 'interpreter', 'latex');
 xl.FontSize = 15;
 yl.FontSize = 15;
-t1=title("Relative Error of Recovering $S_0, L_0$: preconditioned", "Interpreter","latex");
+t1=title("Relative Error of Recovering $S_0, L_0$: preprocessing", "Interpreter","latex");
 t1.FontSize = 16;
 
 %%
-%print("-f1", 'heat_rho', '-djpeg', '-r300')
+%print("-f1", 'figs/heat_rho', '-djpeg', '-r500')
 
 
 
